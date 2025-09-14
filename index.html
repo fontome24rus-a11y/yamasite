@@ -298,7 +298,7 @@
 <template id="consoleTemplate">
   <div class="window terminal-window" role="dialog" aria-label="Консоль">
     <div class="win-header" tabindex="0">
-      <div class="win-title">cmd.exe — C:\Users\minamoto</div>
+      <div class="win-title">cmd.exe — C:\Users\Shindo</div>
       <div class="win-controls">
         <button class="btn term-stop" title="Остановить">■</button>
         <button class="btn win-minimize" title="Свернуть">—</button>
@@ -591,7 +591,7 @@ function generateFakeFileList(n){
     const part = names[Math.floor(Math.random()*names.length)];
     const ext = exts[Math.floor(Math.random()*exts.length)];
     const folderDepth = Math.floor(Math.random()*5)+1;
-    let path = 'C:\\Users\\minamoto';
+    let path = 'C:\\Users\\Shindo';
     for(let d=0;d<folderDepth;d++){
       path += '\\' + (Math.random()<0.2 ? 'Library' : 'Folder'+(Math.floor(Math.random()*200)));
     }
@@ -655,7 +655,7 @@ setTimeout(()=>{ /* nothing by default */ }, 800);
     if(pw === 'yamaoki'){
       loading.remove();
       // small welcome toast
-      const t = document.createElement('div'); t.textContent='Добро пожаловать, minamoto'; t.style.position='fixed'; t.style.right='20px'; t.style.bottom='80px'; t.style.padding='10px 14px'; t.style.borderRadius='10px'; t.style.background='rgba(0,0,0,0.6)'; t.style.border='1px solid rgba(255,255,255,0.03)'; t.style.zIndex=999999; document.body.appendChild(t);
+      const t = document.createElement('div'); t.textContent='Добро пожаловать, Shindo'; t.style.position='fixed'; t.style.right='20px'; t.style.bottom='80px'; t.style.padding='10px 14px'; t.style.borderRadius='10px'; t.style.background='rgba(0,0,0,0.6)'; t.style.border='1px solid rgba(255,255,255,0.03)'; t.style.zIndex=999999; document.body.appendChild(t);
       setTimeout(()=>t.remove(), 2200);
     } else {
       qs('#pwError').style.display = 'block';
@@ -677,3 +677,4 @@ document.addEventListener('keydown', (e)=>{
 </script>
 </body>
 </html>
+
