@@ -79,6 +79,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      user-select: none;
     }
 
     .close-btn {
@@ -196,9 +197,34 @@
     function closeWindow(id) {
       document.getElementById(id).style.display = "none";
     }
+
+    // Перетаскивание окон
+    document.querySelectorAll('.window').forEach(win => {
+      const header = win.querySelector('.window-header');
+      let offsetX = 0, offsetY = 0, isDown = false;
+
+      header.addEventListener('mousedown', e => {
+        isDown = true;
+        offsetX = e.clientX - win.offsetLeft;
+        offsetY = e.clientY - win.offsetTop;
+        win.style.zIndex = 1000; // окно сверху
+      });
+
+      document.addEventListener('mouseup', () => {
+        isDown = false;
+      });
+
+      document.addEventListener('mousemove', e => {
+        if (isDown) {
+          win.style.left = (e.clientX - offsetX) + 'px';
+          win.style.top = (e.clientY - offsetY) + 'px';
+        }
+      });
+    });
   </script>
 </body>
 </html>
+
 
 
 
