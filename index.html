@@ -1,362 +1,679 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>Yamaoki</title>
-  <style>
-    body, html {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      font-family: monospace;
-      background: black;
-      color: #00ff00;
-      overflow: hidden;
-    }
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Yamaoki — ULTRA Desktop</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#07060a;
+    --panel: rgba(255,255,255,0.06);
+    --glass: rgba(255,255,255,0.04);
+    --accent:#21ff4d;
+    --muted: rgba(255,255,255,0.6);
+    --win-shadow: 0 20px 60px rgba(2,6,23,0.75);
+    --radius: 12px;
+    --taskbar-height:56px;
+    --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    --font-mono: "JetBrains Mono", monospace;
+  }
 
-    /* Экран загрузки */
-    #loading {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      flex-direction: column;
-      font-size: 20px;
-    }
+  /* Light theme variables (switched with .light on body) */
+  body.light {
+    --bg: linear-gradient(180deg,#f7f8fb,#e9eef8);
+    --panel: rgba(0,0,0,0.05);
+    --glass: rgba(255,255,255,0.8);
+    --accent:#0066ff;
+    --muted: rgba(0,0,0,0.6);
+    --win-shadow: 0 12px 40px rgba(10,10,10,0.08);
+  }
 
-    #console {
-      white-space: pre;
-      text-align: left;
-      max-width: 600px;
-    }
+  *{box-sizing:border-box}
+  html,body{
+    height:100%;
+    margin:0;
+    font-family:var(--font-sans);
+    background: var(--bg);
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    overflow:hidden;
+    color: #e8f0e8;
+  }
 
-    /* Окно авторизации */
-    #loginWindow {
-      display: none;
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: #222;
-      border: 2px solid #555;
-      padding: 20px;
-      color: white;
-      text-align: center;
-      width: 300px;
-    }
-    #loginWindow input {
-      width: 90%;
-      padding: 8px;
-      margin: 10px 0;
-      border: none;
-      outline: none;
-    }
-    #loginWindow button {
-      padding: 5px 15px;
-      background: #00ff00;
-      border: none;
-      cursor: pointer;
-    }
+  /* full desktop area */
+  #desktopRoot {
+    position:relative;
+    width:100%;
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+    user-select:none;
+  }
 
-    /* Рабочий стол */
-    #desktop {
-      display: none;
-      width: 100%;
-      height: 100%;
-      background: url('https://i.pinimg.com/736x/a4/2a/a5/a42aa5b3a202d20a8ea54e594f1315e2.jpg') no-repeat center center;
-      background-size: cover;
-      position: relative;
-      color: white;
-      padding: 20px;
-    }
+  /* wallpaper + overlay */
+  #wallpaper{
+    position:absolute;
+    inset:0;
+    background-image: url('https://images.unsplash.com/photo-1549880338-65ddcdfd017b?q=80&w=1920&auto=format&fit=crop&ixlib=rb-4.0.3&s='); /* fallback */
+    background-size:cover;
+    background-position:center;
+    filter:brightness(0.45) saturate(1.1);
+    z-index:0;
+  }
+  body.light #wallpaper { filter: none; opacity:0.95; }
 
-    .icon {
-      width: 80px;
-      text-align: center;
-      cursor: pointer;
-      display: inline-block;
-      margin: 20px;
-    }
+  /* topbar area (can be empty) */
+  .desktop-area{
+    position:relative;
+    z-index:10;
+    flex:1;
+    display:flex;
+    padding:20px;
+    gap:12px;
+    align-items:flex-start;
+    overflow:auto;
+  }
 
-    .icon img {
-      width: 64px;
-      height: 64px;
-      display: block;
-      margin: 0 auto;
-    }
+  /* icons grid */
+  .icons {
+    width:320px;
+    max-width:calc(100% - 40px);
+    display:grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap:14px;
+    padding:8px;
+    background: linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0.18));
+    border-radius:14px;
+    box-shadow: var(--win-shadow);
+    border:1px solid rgba(255,255,255,0.03);
+    backdrop-filter: blur(8px) saturate(1.1);
+  }
+  .icon {
+    padding:10px;
+    display:flex;
+    gap:8px;
+    align-items:center;
+    cursor:pointer;
+    border-radius:10px;
+    transition:transform .12s ease, background .12s ease;
+  }
+  .icon:hover{ transform: translateY(-6px); background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); }
+  .icon svg { width:44px; height:44px; flex-shrink:0; filter: drop-shadow(0 6px 18px rgba(0,0,0,0.6)); }
+  .icon .label { font-weight:600; font-size:14px; color:var(--muted) }
 
-    /* Окно */
-    .window {
-      position: absolute;
-      top: 100px;
-      left: 100px;
-      width: 600px;
-      height: 500px;
-      background: #222;
-      color: #00ff00; /* зелёный текст как консоль */
-      border: 2px solid #555;
-      display: none;
-      flex-direction: column;
-      font-family: monospace;
-    }
+  /* Taskbar */
+  #taskbar {
+    position:fixed;
+    left:0; right:0; bottom:0;
+    height:var(--taskbar-height);
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:6px 12px;
+    z-index:9999;
+    background: linear-gradient(180deg, rgba(0,0,0,0.35), rgba(0,0,0,0.45));
+    border-top:1px solid rgba(255,255,255,0.03);
+    backdrop-filter: blur(8px);
+  }
+  #startBtn{
+    width:44px; height:44px; border-radius:10px; display:inline-grid; place-items:center;
+    background:var(--glass); cursor:pointer; border:1px solid rgba(255,255,255,0.03);
+  }
+  #taskIcons { display:flex; gap:8px; align-items:center; overflow:auto; padding-left:8px;}
+  .task-item {
+    min-width:44px; height:44px; display:inline-grid; place-items:center; border-radius:8px;
+    padding:6px; cursor:pointer; background:transparent; transition:transform .12s;
+    border:1px solid transparent;
+  }
+  .task-item.active{ background:linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01)); border-color: rgba(255,255,255,0.04) }
+  #taskClock { margin-left:auto; color:var(--muted); font-weight:600; padding-right:8px; min-width:120px; text-align:right; }
 
-    .window-header {
-      background: #444;
-      padding: 5px;
-      cursor: move;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      user-select: none;
-    }
+  /* Start menu */
+  #startMenu {
+    position:fixed; left:12px; bottom:calc(var(--taskbar-height) + 12px);
+    width:360px; max-width:calc(100% - 24px);
+    background: linear-gradient(180deg, rgba(10,10,12,0.95), rgba(6,6,8,0.88));
+    border-radius:12px; padding:12px; box-shadow: var(--win-shadow); display:none; z-index:99999;
+    border:1px solid rgba(255,255,255,0.03); backdrop-filter: blur(6px);
+  }
+  #startMenu .search {
+    display:flex; gap:8px; align-items:center; padding:8px; border-radius:8px; background: rgba(255,255,255,0.02);
+  }
+  #startMenu .search input { background:transparent; border:none; outline:none; color:#fff; flex:1; font-size:14px; padding:6px; }
+  #startMenu .apps { margin-top:10px; display:grid; grid-template-columns: repeat(3,1fr); gap:8px; }
 
-    .window-header .controls {
-      display: flex;
-      gap: 5px;
-    }
+  /* Windows (app windows) */
+  .window {
+    position:absolute;
+    width:700px; height:480px;
+    background: linear-gradient(180deg, rgba(12,12,12,0.98), rgba(10,10,11,0.98));
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,0.04);
+    box-shadow: var(--win-shadow);
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+    z-index:20;
+    resize: both;
+    min-width:320px; min-height:180px;
+    color:var(--accent);
+    font-family: var(--font-mono);
+  }
 
-    .close-btn, .max-btn {
-      background: #333;
-      border: none;
-      color: white;
-      cursor: pointer;
-      width: 25px;
-      height: 25px;
-    }
+  .win-header{
+    height:46px; display:flex; align-items:center; gap:12px; padding:0 12px;
+    background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    cursor:grab;
+  }
+  .win-title { font-weight:700; color:var(--muted); font-family:var(--font-sans); }
+  .win-controls { margin-left:auto; display:flex; gap:8px; align-items:center; }
+  .win-controls button{ width:36px; height:32px; border-radius:8px; border:none; background:transparent; cursor:pointer; color:var(--muted) }
+  .win-body { padding:12px; flex:1; overflow:auto; background: linear-gradient(180deg, rgba(0,0,0,0.88), rgba(0,0,0,0.92)); color:var(--accent); font-size:13px; white-space:pre-wrap; }
 
-    .close-btn:hover { background: red; }
-    .max-btn:hover { background: #00aa00; }
+  .minimized { transform: translateY(6px) scale(0.98); opacity:0.9; }
 
-    .window-content {
-      padding: 10px;
-      flex: 1;
-      background: black;
-      color: #00ff00;
-      overflow-y: auto;
-      font-size: 14px;
-    }
+  /* console styling */
+  .terminal {
+    background: #000;
+    border-radius:8px;
+    padding:12px;
+    height:100%;
+    box-sizing:border-box;
+    color: var(--accent);
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .term-output {
+    font-family: var(--font-mono);
+    font-size:13px;
+    overflow:auto;
+    white-space:pre;
+    background: linear-gradient(180deg, rgba(0,0,0,0.95), rgba(4,4,4,0.98));
+    padding:10px;
+    border-radius:6px;
+    flex:1;
+  }
+  .term-actions { display:flex; gap:8px; align-items:center; }
+  .btn { padding:8px 10px; border-radius:8px; border:none; cursor:pointer; background:rgba(255,255,255,0.03); color:var(--muted); font-weight:600; }
 
-    .window-content iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
-  </style>
+  /* small screens */
+  @media (max-width:800px){
+    .window{ width:calc(100% - 28px); left:12px !important; top:60px !important; height:60vh; min-width:unset; }
+    .icons{ width:100%; grid-template-columns: repeat(3, 1fr); }
+    #taskClock{ display:none; }
+  }
+</style>
 </head>
 <body>
-  <!-- Экран загрузки -->
-  <div id="loading">
-    <div id="console"></div>
-  </div>
+<div id="desktopRoot" aria-label="Desktop">
+  <div id="wallpaper" role="img" aria-label="Wallpaper"></div>
 
-  <!-- Окно авторизации -->
-  <div id="loginWindow">
-    <h3>Авторизация</h3>
-    <p>Введите пароль для входа:</p>
-    <input type="password" id="passwordInput" placeholder="Пароль">
-    <br>
-    <button onclick="checkPassword()">Войти</button>
-    <p id="error" style="color:red; display:none;">Неверный пароль</p>
-  </div>
-
-  <!-- Рабочий стол -->
-  <div id="desktop">
-    <div class="icon" onclick="openWindow('doc1')">
-      <img src="https://img.icons8.com/fluency/96/document.png" alt="doc">
-      <span>Документ 1</span>
-    </div>
-    <div class="icon" onclick="openWindow('doc2')">
-      <img src="https://img.icons8.com/fluency/96/document.png" alt="doc">
-      <span>Документ 2</span>
-    </div>
-    <div class="icon" onclick="openWindow('pinball')">
-      <img src="https://img.icons8.com/color/96/ball.png" alt="Pinball">
-      <span>Pinball</span>
-    </div>
-    <!-- NEW: иконка взлома -->
-    <div class="icon" onclick="openHack()">
-      <img src="https://img.icons8.com/fluency/96/command-line.png" alt="Hack">
-      <span>взлом жопы минамото</span>
-    </div>
-
-    <!-- Окна -->
-    <div id="doc1" class="window">
-      <div class="window-header">
-        Документ 1
-        <div class="controls">
-          <button class="max-btn" onclick="toggleMaximize('doc1')">[]</button>
-          <button class="close-btn" onclick="closeWindow('doc1')">X</button>
-        </div>
+  <div class="desktop-area" id="desktopArea" aria-hidden="false">
+    <!-- Icons -->
+    <div class="icons" role="list" aria-label="Desktop icons">
+      <div class="icon" role="listitem" tabindex="0" data-app="doc1" aria-label="Документ 1">
+        <!-- doc svg -->
+        <svg viewBox="0 0 24 24" fill="none"><path d="M6 2h7l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" stroke="#fff" stroke-opacity="0.9" stroke-width="1.2" stroke-linejoin="round"/></svg>
+        <div class="label">Документ 1</div>
       </div>
-      <div class="window-content">
-        <a href="https://docs.google.com/document/d/1Y6DRS1MohZX0iOjmxPQ00dUmBa-VnthWRDAiNuDU78I/edit?tab=t.0" target="_blank">документ с реворком</a>
+
+      <div class="icon" role="listitem" tabindex="0" data-app="doc2" aria-label="Документ 2">
+        <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="3" width="16" height="18" rx="2" stroke="#fff" stroke-opacity="0.9" stroke-width="1.2"/></svg>
+        <div class="label">Документ 2</div>
+      </div>
+
+      <div class="icon" role="listitem" tabindex="0" data-app="pinball" aria-label="Pinball">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="7" stroke="#fff" stroke-opacity="0.9" stroke-width="1.2"/></svg>
+        <div class="label">Pinball</div>
+      </div>
+
+      <!-- ULTRA: hack icon -->
+      <div class="icon" role="listitem" tabindex="0" id="hackIcon" aria-label="взлом жопы минамото">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M3 6h18v12H3z" stroke="#fff" stroke-width="1.2" stroke-linejoin="round"/>
+          <path d="M7 10l3 2-3 2" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M14 15h4" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="label">взлом жопы минамото</div>
+      </div>
+
+      <div class="icon" role="listitem" tabindex="0" id="themeToggle" aria-label="Переключить тему">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v2M12 19v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4" stroke="#fff" stroke-opacity="0.9" stroke-width="1.1" stroke-linecap="round"/></svg>
+        <div class="label">Тема</div>
       </div>
     </div>
 
-    <div id="doc2" class="window">
-      <div class="window-header">
-        Документ 2
-        <div class="controls">
-          <button class="max-btn" onclick="toggleMaximize('doc2')">[]</button>
-          <button class="close-btn" onclick="closeWindow('doc2')">X</button>
-        </div>
+    <!-- optional center area with welcome -->
+    <div style="flex:1; display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,0.9); text-align:center; padding:20px;">
+      <div>
+        <h1 style="margin:0 0 8px 0; font-family:var(--font-sans); font-weight:800;">Yamaoki — ULTRA Desktop</h1>
+        <div style="color:var(--muted); max-width:560px;">Панель управления, окна и фейковая консоль — улучшены: перетаскивание, ресайз, мультиконсоли и красивый UI.</div>
       </div>
-      <div class="window-content">
-        Тут текст или содержимое документа №2.
-      </div>
-    </div>
-
-    <div id="pinball" class="window">
-      <div class="window-header">
-        Pinball
-        <div class="controls">
-          <button class="max-btn" onclick="toggleMaximize('pinball')">[]</button>
-          <button class="close-btn" onclick="closeWindow('pinball')">X</button>
-        </div>
-      </div>
-      <div class="window-content">
-        <iframe src="https://funhtml5games.com?embed=pinball" allowfullscreen></iframe>
-      </div>
-    </div>
-
-    <!-- NEW: окно взлома -->
-    <div id="hack" class="window">
-      <div class="window-header">
-        Консоль
-        <div class="controls">
-          <button class="max-btn" onclick="toggleMaximize('hack')">[]</button>
-          <button class="close-btn" onclick="closeWindow('hack')">X</button>
-        </div>
-      </div>
-      <div class="window-content" id="hackContent"></div>
     </div>
   </div>
 
-  <script>
-    // Эффект печатания на экране загрузки
-    const messages = [
-      "Connecting to database...",
-      "Authorizing...",
-      "Fetching data...",
-      "Access granted."
-    ];
-    let consoleDiv = document.getElementById("console");
-    let idx = 0;
+  <!-- Start Menu -->
+  <div id="startMenu" role="menu" aria-hidden="true">
+    <div class="search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M21 21l-4.35-4.35" stroke="#fff" stroke-opacity="0.7" stroke-width="1.4" stroke-linecap="round"/></svg>
+      <input id="startSearch" placeholder="Поиск..." aria-label="Поиск в меню"/>
+      <div style="width:8px"></div>
+      <button class="btn" id="quickLogout">Выйти</button>
+    </div>
+    <div class="apps" id="startApps" aria-hidden="false">
+      <div class="icon" data-app="doc1"><svg viewBox="0 0 24 24" fill="none"><path d="M6 2h7l5 5v13a2 2 0 0 1-2 2H6z" stroke="#fff" stroke-opacity="0.9" stroke-width="1.2" stroke-linejoin="round"/></svg><div class="label">Документ 1</div></div>
+      <div class="icon" data-app="hack"><svg viewBox="0 0 24 24" fill="none"><path d="M3 6h18v12H3z" stroke="#fff" stroke-width="1.2"/></svg><div class="label">Консоль</div></div>
+      <div class="icon" data-app="pinball"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="7" stroke="#fff" stroke-opacity="0.9" stroke-width="1.2"/></svg><div class="label">Pinball</div></div>
+    </div>
+  </div>
 
-    function typeLine() {
-      if (idx < messages.length) {
-        let line = messages[idx];
-        let i = 0;
-        let interval = setInterval(() => {
-          consoleDiv.textContent += line[i];
-          i++;
-          if (i >= line.length) {
-            clearInterval(interval);
-            consoleDiv.textContent += "\n";
-            idx++;
-            setTimeout(typeLine, 500);
-          }
-        }, 50);
-      } else {
-        setTimeout(() => {
-          document.getElementById("loading").style.display = "none";
-          document.getElementById("loginWindow").style.display = "block";
-        }, 1000);
-      }
+  <!-- Taskbar -->
+  <div id="taskbar" role="toolbar" aria-label="Taskbar">
+    <div id="startBtn" title="Пуск" role="button" tabindex="0" aria-pressed="false">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="1" stroke="#fff" stroke-opacity="0.9" stroke-width="1.1"/><rect x="13" y="3" width="8" height="8" rx="1" stroke="#fff" stroke-opacity="0.9" stroke-width="1.1"/></svg>
+    </div>
+    <div id="taskIcons" aria-hidden="false"></div>
+    <div id="taskClock" aria-live="polite"></div>
+  </div>
+</div>
+
+<!-- Templates (hidden) -->
+<template id="windowTemplate">
+  <div class="window" role="dialog" aria-modal="false">
+    <div class="win-header" tabindex="0">
+      <div class="win-title">Приложение</div>
+      <div class="win-controls">
+        <button class="btn win-minimize" title="Свернуть">—</button>
+        <button class="btn win-maximize" title="Развернуть">□</button>
+        <button class="btn win-close" title="Закрыть">✕</button>
+      </div>
+    </div>
+    <div class="win-body">Содержимое</div>
+  </div>
+</template>
+
+<template id="consoleTemplate">
+  <div class="window terminal-window" role="dialog" aria-label="Консоль">
+    <div class="win-header" tabindex="0">
+      <div class="win-title">cmd.exe — C:\Users\minamoto</div>
+      <div class="win-controls">
+        <button class="btn term-stop" title="Остановить">■</button>
+        <button class="btn win-minimize" title="Свернуть">—</button>
+        <button class="btn win-maximize" title="Развернуть">□</button>
+        <button class="btn win-close" title="Закрыть">✕</button>
+      </div>
+    </div>
+    <div class="win-body">
+      <div style="display:flex;flex-direction:column;height:100%;">
+        <div class="term-output" aria-live="polite"></div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="btn term-restart">Перезапустить</button>
+          <button class="btn term-copy">Скопировать логи</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+/* ---------- Utilities ---------- */
+const qs = s => document.querySelector(s);
+const qsa = s => Array.from(document.querySelectorAll(s));
+let zIndexCounter = 50;
+
+/* ---------- Start menu & Taskbar ---------- */
+const startBtn = qs('#startBtn');
+const startMenu = qs('#startMenu');
+startBtn.addEventListener('click', toggleStart);
+startBtn.addEventListener('keydown', e=>{ if(e.key==='Enter') toggleStart(); });
+
+function toggleStart(){
+  const shown = startMenu.style.display === 'block';
+  startMenu.style.display = shown ? 'none' : 'block';
+  startBtn.setAttribute('aria-pressed', String(!shown));
+  if(!shown) qs('#startSearch').focus();
+}
+
+/* hide start when clicking outside */
+document.addEventListener('click', (e)=>{
+  if (!startMenu.contains(e.target) && !startBtn.contains(e.target)) startMenu.style.display = 'none';
+});
+
+/* clock */
+function updateClock(){
+  // show local time (browser time). If you want Paris time regardless, you can use toLocaleString with 'Europe/Paris'.
+  const now = new Date();
+  const opts = { hour:'2-digit', minute:'2-digit', second:'2-digit' };
+  qs('#taskClock').textContent = now.toLocaleTimeString([], opts);
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+/* ---------- Theme toggle ---------- */
+qs('#themeToggle').addEventListener('click', ()=>{
+  document.body.classList.toggle('light');
+});
+
+/* ---------- Desktop icon activation (open app windows) ---------- */
+function createWindow({title='App', content='...', width=700, height=480, x=80, y=60, isTerminal=false}){
+  const tpl = isTerminal ? qs('#consoleTemplate') : qs('#windowTemplate');
+  const node = tpl.content.firstElementChild.cloneNode(true);
+  // set initial pos & size
+  node.style.left = (x + Math.random()*40)+'px';
+  node.style.top = (y + Math.random()*40)+'px';
+  node.style.width = width+'px';
+  node.style.height = height+'px';
+  node.style.zIndex = ++zIndexCounter;
+
+  node.querySelector('.win-title').textContent = title;
+  const body = node.querySelector('.win-body');
+
+  // if terminal, body already has term-output etc
+  if(isTerminal){
+    // nothing extra for now
+  } else {
+    if (content instanceof HTMLElement) body.appendChild(content);
+    else body.textContent = content;
+  }
+
+  document.body.appendChild(node);
+  makeWindowInteractive(node);
+  addToTaskbar(node, title, isTerminal);
+  return node;
+}
+
+function makeWindowInteractive(win){
+  // bring to front on mousedown
+  win.addEventListener('mousedown', ()=>{ win.style.zIndex = ++zIndexCounter; });
+
+  const header = win.querySelector('.win-header');
+  let dragging = false, offsetX=0, offsetY=0;
+
+  header.addEventListener('mousedown', (e)=>{
+    if (e.target.closest('button')) return; // don't drag when clicking controls
+    dragging = true;
+    win.style.zIndex = ++zIndexCounter;
+    offsetX = e.clientX - win.offsetLeft;
+    offsetY = e.clientY - win.offsetTop;
+    header.style.cursor = 'grabbing';
+  });
+  document.addEventListener('mousemove', (e)=>{
+    if(!dragging) return;
+    win.style.left = (e.clientX - offsetX)+'px';
+    win.style.top = (e.clientY - offsetY)+'px';
+  });
+  document.addEventListener('mouseup', ()=>{ dragging = false; header.style.cursor='grab'; });
+
+  // close/minimize/maximize
+  const btnClose = win.querySelector('.win-close');
+  const btnMin = win.querySelectorAll('.win-minimize');
+  const btnMax = win.querySelectorAll('.win-maximize');
+
+  btnClose && btnClose.addEventListener('click', ()=>{ removeWindow(win); });
+
+  btnMin && btnMin.forEach(b=>{
+    b.addEventListener('click', ()=>{ minimizeWindow(win); });
+  });
+
+  btnMax && btnMax.forEach(b=>{
+    b.addEventListener('click', ()=>{ toggleMaximize(win); });
+  });
+
+  // focus styles & keyboard
+  header.addEventListener('keydown', (e)=>{
+    if(e.key === 'Escape') removeWindow(win);
+    if(e.key === ' ' || e.key === 'Enter') win.style.zIndex = ++zIndexCounter;
+  });
+
+  // accessibility: bring to front on focus
+  win.setAttribute('tabindex','-1');
+}
+
+/* ---------- Taskbar items ---------- */
+function addToTaskbar(win, title, isTerminal=false){
+  const id = 'task-'+(Math.random().toString(36).slice(2,8));
+  win.dataset.taskId = id;
+  const item = document.createElement('div');
+  item.className = 'task-item';
+  item.title = title;
+  item.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect width="18" height="18" rx="4" y="3" x="3" stroke="#fff" stroke-opacity="0.9" stroke-width="1"/></svg>`;
+  qs('#taskIcons').appendChild(item);
+
+  // click toggles minimize/restore
+  item.addEventListener('click', ()=>{
+    if (win.style.display === 'none' || win.classList.contains('minimized')) {
+      restoreWindow(win);
+    } else {
+      minimizeWindow(win);
     }
-    typeLine();
+  });
 
-    // Проверка пароля
-    function checkPassword() {
-      const input = document.getElementById("passwordInput").value;
-      if (input === "yamaoki") {
-        document.getElementById("loginWindow").style.display = "none";
-        document.getElementById("desktop").style.display = "block";
-      } else {
-        document.getElementById("error").style.display = "block";
-      }
+  // keep only for open windows; remove on close is handled by removeWindow
+  item.dataset.taskId = id;
+  win._taskItem = item;
+  setTimeout(()=>{ item.classList.add('active') }, 50);
+}
+
+function removeTaskbarItem(win){
+  if(win && win._taskItem) {
+    win._taskItem.remove();
+  }
+}
+
+/* ---------- Window controls ---------- */
+function removeWindow(win){
+  removeTaskbarItem(win);
+  try { win.remove(); } catch(e){ /*ignore*/ }
+}
+function minimizeWindow(win){
+  win.style.display = 'none';
+  if(win._taskItem) win._taskItem.classList.remove('active');
+}
+function restoreWindow(win){
+  win.style.display = 'flex';
+  win.style.zIndex = ++zIndexCounter;
+  if(win._taskItem) win._taskItem.classList.add('active');
+}
+function toggleMaximize(win){
+  if(win.dataset.max === 'true'){
+    // restore
+    win.style.left = win.dataset.prevLeft;
+    win.style.top = win.dataset.prevTop;
+    win.style.width = win.dataset.prevWidth;
+    win.style.height = win.dataset.prevHeight;
+    win.dataset.max = 'false';
+  } else {
+    // store
+    win.dataset.prevLeft = win.style.left;
+    win.dataset.prevTop = win.style.top;
+    win.dataset.prevWidth = win.style.width;
+    win.dataset.prevHeight = win.style.height;
+    win.style.left = '0px';
+    win.style.top = '0px';
+    win.style.width = '100%';
+    win.style.height = 'calc(100vh - var(--taskbar-height))';
+    win.dataset.max = 'true';
+    win.style.zIndex = ++zIndexCounter;
+  }
+}
+
+/* ---------- Desktop icon clicks (open apps) ---------- */
+qsa('.icon[data-app]').forEach(el=>{
+  el.addEventListener('dblclick', ()=>{ launchFromIcon(el.dataset.app); });
+  el.addEventListener('keydown', (e)=>{ if(e.key==='Enter') launchFromIcon(el.dataset.app); });
+});
+qsa('#startApps .icon').forEach(el=>{
+  el.addEventListener('click', ()=>{ launchFromIcon(el.dataset.app); });
+});
+
+function launchFromIcon(appId){
+  if(appId === 'doc1') {
+    const content = document.createElement('div');
+    content.innerHTML = 'Документ 1 — ссылка: <a href="https://docs.google.com/document/d/1Y6DRS1MohZX0iOjmxPQ00dUmBa-VnthWRDAiNuDU78I/edit" target="_blank" style="color:var(--muted)">Открыть в Google Docs</a>';
+    createWindow({title:'Документ 1', content});
+  } else if(appId === 'doc2'){
+    const content = document.createElement('div');
+    content.innerHTML = '<h3>Документ 2</h3><p>Здесь можно разместить какой-то текст.</p>';
+    createWindow({title:'Документ 2', content});
+  } else if(appId === 'pinball'){
+    const iframe = document.createElement('iframe');
+    iframe.src = 'https://funhtml5games.com?embed=pinball';
+    iframe.style.width = '100%'; iframe.style.height = '100%'; iframe.style.border='none';
+    const wnd = createWindow({title:'Pinball', content:iframe});
+    // replace content
+    const body = wnd.querySelector('.win-body');
+    body.innerHTML = ''; body.appendChild(iframe);
+  } else if(appId === 'hack' || appId === 'взлом жопы минамото' || appId === 'hackIcon') {
+    openConsoleInstance();
+  }
+}
+
+/* ---------- Multiple console instances ---------- */
+let consoleCount = 0;
+function openConsoleInstance(){
+  consoleCount++;
+  const wnd = createWindow({title:`Консоль — instance #${consoleCount}`, isTerminal:true, width:820, height:420});
+  // place terminal content
+  const termOutput = wnd.querySelector('.term-output');
+  const stopBtn = wnd.querySelector('.term-stop');
+  const restartBtn = wnd.querySelector('.term-restart');
+  const copyBtn = wnd.querySelector('.term-copy');
+
+  // populate with simulated dir /s output
+  let running = true;
+  let lineIndex = 0;
+  const simulated = generateFakeFileList(500); // many lines
+
+  function step(){
+    if(!running) return;
+    if(lineIndex < simulated.length){
+      termOutput.textContent += simulated[lineIndex] + "\n";
+      termOutput.scrollTop = termOutput.scrollHeight;
+      lineIndex++;
+      // schedule next
+      const delay = 6 + Math.random()*30; // variable speed
+      wnd._termTimer = setTimeout(step, delay);
+    } else {
+      termOutput.textContent += "\nВзлом завершен.\n";
+      termOutput.scrollTop = termOutput.scrollHeight;
     }
+  }
+  // start
+  termOutput.textContent = "C:\\>dir /s\n\n";
+  step();
 
-    // Открытие/закрытие окон
-    function openWindow(id) {
-      document.getElementById(id).style.display = "flex";
+  stopBtn.addEventListener('click', ()=>{
+    running = false;
+    clearTimeout(wnd._termTimer);
+    termOutput.textContent += "\n[Процесс остановлен пользователем]\n";
+  });
+  restartBtn.addEventListener('click', ()=>{
+    running = true;
+    lineIndex = 0;
+    termOutput.textContent = "C:\\>dir /s\n\n";
+    clearTimeout(wnd._termTimer);
+    step();
+  });
+  copyBtn.addEventListener('click', ()=>{
+    navigator.clipboard.writeText(termOutput.textContent).then(()=> alert('Логи скопированы в буфер обмена.'));
+  });
+}
+
+/* tiny fake file list generator */
+function generateFakeFileList(n){
+  const names = ['system','win32','kernel','user','config','lib','data','cache','tmp','plugin','Файл','Документ','module','drv'];
+  const exts = ['.dll','.exe','.dat','.sys','.txt','.log','.cfg','.bin','.so','.json'];
+  const out=[];
+  for(let i=0;i<n;i++){
+    const part = names[Math.floor(Math.random()*names.length)];
+    const ext = exts[Math.floor(Math.random()*exts.length)];
+    const folderDepth = Math.floor(Math.random()*5)+1;
+    let path = 'C:\\Users\\minamoto';
+    for(let d=0;d<folderDepth;d++){
+      path += '\\' + (Math.random()<0.2 ? 'Library' : 'Folder'+(Math.floor(Math.random()*200)));
     }
-    function closeWindow(id) {
-      document.getElementById(id).style.display = "none";
+    out.push(path + '\\' + part + '_' + i + ext);
+  }
+  return out;
+}
+
+/* ---------- remove window on Escape globally if focused element is inside a window header */ 
+document.addEventListener('keydown', (e)=>{
+  if(e.key === 'Escape'){
+    // try close topmost focused window
+    const wins = Array.from(document.querySelectorAll('.window')).sort((a,b)=>b.style.zIndex - a.style.zIndex);
+    if(wins.length) {
+      const top = wins[0];
+      removeWindow(top);
     }
+  }
+});
 
-    // NEW: запуск консоли
-    function openHack() {
-      const win = document.getElementById("hack");
-      win.style.display = "flex";
-      const content = document.getElementById("hackContent");
-      content.textContent = "C:\\>dir /s\n\n";
-      let lines = [];
-      for (let i = 0; i < 499; i++) {
-        lines.push("Файл_" + i + ".dll");
-      }
-      let i = 0;
-      let interval = setInterval(() => {
-        if (i < lines.length) {
-          content.textContent += lines[i] + "\n";
-          content.scrollTop = content.scrollHeight;
-          i++;
-        } else {
-          clearInterval(interval);
-          content.textContent += "\nВзлом завершен.";
-        }
-      }, 20);
+/* ---------- initial quick demo: pre-open console once (optional) ---------- */
+setTimeout(()=>{ /* nothing by default */ }, 800);
+
+/* ---------- login (keeps original behaviour) ---------- */
+(function addLoginFlow(){
+  // create a small modal simulating original flow
+  const loading = document.createElement('div');
+  loading.id = 'loadingModal';
+  loading.style.position='fixed'; loading.style.left=0; loading.style.top=0; loading.style.right=0; loading.style.bottom=0;
+  loading.style.display='flex'; loading.style.alignItems='center'; loading.style.justifyContent='center';
+  loading.style.background='linear-gradient(180deg, rgba(0,0,0,0.8), rgba(0,0,0,0.6))';
+  loading.style.zIndex=999999;
+  loading.innerHTML = `<div style="color:var(--muted);font-family:var(--font-mono); text-align:center; padding:30px; border-radius:12px; background:rgba(0,0,0,0.6); border:1px solid rgba(255,255,255,0.03);">
+    <div id="loadingConsole" style="white-space:pre; text-align:left; max-width:440px; font-size:13px; color:var(--muted)"></div>
+    <div style="margin-top:12px; display:flex; gap:8px; justify-content:center;">
+      <input id="pwInput" placeholder="Введите пароль" style="padding:8px;border-radius:8px;border:none;outline:none;background:rgba(255,255,255,0.02); color:#fff"/>
+      <button id="pwBtn" class="btn">Войти</button>
+    </div>
+    <div id="pwError" style="color:#ff6b6b; margin-top:8px; display:none;">Неверный пароль</div>
+  </div>`;
+  document.body.appendChild(loading);
+
+  // type-like intro
+  const lines = ["Initializing Yamaoki UI...", "Loading modules...", "Authenticating user...", "Ready."];
+  const out = qs('#loadingConsole');
+  let li = 0;
+  function typeLine(){
+    if(li >= lines.length) return;
+    const text = lines[li];
+    let i=0;
+    const int = setInterval(()=>{
+      out.textContent += text[i]; i++;
+      if(i>=text.length){ clearInterval(int); out.textContent += '\n'; li++; setTimeout(typeLine, 450); }
+    }, 28);
+  }
+  typeLine();
+
+  // password check (original password "yamaoki")
+  function attemptLogin(){
+    const pw = qs('#pwInput').value;
+    if(pw === 'yamaoki'){
+      loading.remove();
+      // small welcome toast
+      const t = document.createElement('div'); t.textContent='Добро пожаловать, minamoto'; t.style.position='fixed'; t.style.right='20px'; t.style.bottom='80px'; t.style.padding='10px 14px'; t.style.borderRadius='10px'; t.style.background='rgba(0,0,0,0.6)'; t.style.border='1px solid rgba(255,255,255,0.03)'; t.style.zIndex=999999; document.body.appendChild(t);
+      setTimeout(()=>t.remove(), 2200);
+    } else {
+      qs('#pwError').style.display = 'block';
+      setTimeout(()=>{ qs('#pwError').style.display='none'; }, 2000);
     }
+  }
+  qs('#pwBtn').addEventListener('click', attemptLogin);
+  qs('#pwInput').addEventListener('keydown', (e)=>{ if(e.key==='Enter') attemptLogin(); });
+})();
 
-    // Максимизация окна
-    const maximized = {};
-    function toggleMaximize(id) {
-      const win = document.getElementById(id);
-      if (!maximized[id]) {
-        win.dataset.prevLeft = win.style.left;
-        win.dataset.prevTop = win.style.top;
-        win.dataset.prevWidth = win.style.width;
-        win.dataset.prevHeight = win.style.height;
-        win.style.left = "0px";
-        win.style.top = "0px";
-        win.style.width = "100%";
-        win.style.height = "100%";
-        maximized[id] = true;
-      } else {
-        win.style.left = win.dataset.prevLeft;
-        win.style.top = win.dataset.prevTop;
-        win.style.width = win.dataset.prevWidth;
-        win.style.height = win.dataset.prevHeight;
-        maximized[id] = false;
-      }
-    }
+/* ---------- Hack icon click binding ---------- */
+qs('#hackIcon').addEventListener('dblclick', ()=>{ openConsoleInstance(); });
+qs('#hackIcon').addEventListener('click', ()=>{ /* single click: small bounce */ qs('#hackIcon').style.transform='translateY(-4px)'; setTimeout(()=>qs('#hackIcon').style.transform='',120); });
 
-    // Перетаскивание окон
-    document.querySelectorAll('.window').forEach(win => {
-      const header = win.querySelector('.window-header');
-      let offsetX = 0, offsetY = 0, isDown = false;
-
-      header.addEventListener('mousedown', e => {
-        if (e.target.classList.contains("close-btn") || e.target.classList.contains("max-btn")) return;
-        isDown = true;
-        offsetX = e.clientX - win.offsetLeft;
-        offsetY = e.clientY - win.offsetTop;
-        win.style.zIndex = 1000;
-      });
-
-      document.addEventListener('mouseup', () => {
-        isDown = false;
-      });
-
-      document.addEventListener('mousemove', e => {
-        if (isDown && !maximized[win.id]) {
-          win.style.left = (e.clientX - offsetX) + 'px';
-          win.style.top = (e.clientY - offsetY) + 'px';
-        }
-      });
-    });
-  </script>
+/* ---------- Accessibility: focus outline for keyboard nav ---------- */
+document.addEventListener('keydown', (e)=>{
+  if(e.key === 'Tab') document.body.classList.add('using-keyboard');
+});
+</script>
 </body>
 </html>
-
