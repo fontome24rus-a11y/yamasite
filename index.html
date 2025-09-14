@@ -3,355 +3,418 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Yamaoki Hacker</title>
+<title>Yamaoki Hacker Max</title>
 <style>
 /* ============================= */
 /* ГЛОБАЛЬНЫЕ СТИЛИ */
 /* ============================= */
-html, body {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%;
-    font-family: 'Courier New', monospace;
-    background-color: #0d0d0d;
-    color: #00ff00;
-    overflow: hidden;
+html, body{
+  margin:0;
+  padding:0;
+  width:100%;
+  height:100%;
+  font-family:'Courier New', monospace;
+  background:#0d0d0d;
+  color:#00ff00;
+  overflow:hidden;
 }
-
 /* ============================= */
-/* ЭФФЕКТ МЕРЦАЮЩЕГО ТЕКСТА */
+/* MATRIX BACKGROUND */
 /* ============================= */
-@keyframes flicker {
-    0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; }
-    20%, 22%, 24%, 55% { opacity: 0.4; }
+#matrixCanvas{
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  z-index:0;
 }
-
-.flicker { animation: flicker 1.5s infinite; }
-
-/* ============================= */
-/* ОСНОВНОЙ КОНТЕЙНЕР */
-/* ============================= */
-#desktop {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(circle at 50% 50%, #001a00 0%, #0d0d0d 100%);
-    overflow: hidden;
-}
-
 /* ============================= */
 /* ОКНА */
 /* ============================= */
-.window {
-    position: absolute;
-    width: 400px;
-    height: 300px;
-    background-color: #0a0a0a;
-    border: 2px solid #00ff00;
-    box-shadow: 0 0 20px #00ff00;
-    resize: both;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
+.window{
+  position:absolute;
+  width:400px;
+  height:300px;
+  background:#0a0a0a;
+  border:2px solid #00ff00;
+  box-shadow:0 0 20px #00ff00;
+  resize:both;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  z-index:1;
 }
-
-.window-header {
-    height: 30px;
-    background-color: #001a00;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 5px;
-    cursor: move;
+.window-header{
+  height:30px;
+  background:#001a00;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 5px;
+  cursor:move;
 }
-
-.window-title {
-    font-weight: bold;
-    color: #00ff00;
+.window-title{
+  font-weight:bold;
+  color:#00ff00;
 }
-
-.window-buttons span {
-    width: 20px;
-    height: 20px;
-    display: inline-block;
-    text-align: center;
-    line-height: 20px;
-    border: 1px solid #00ff00;
-    margin-left: 2px;
-    cursor: pointer;
+.window-buttons span{
+  width:20px;
+  height:20px;
+  display:inline-block;
+  text-align:center;
+  line-height:20px;
+  border:1px solid #00ff00;
+  margin-left:2px;
+  cursor:pointer;
 }
-
-.window-content {
-    flex: 1;
-    padding: 5px;
-    overflow-y: auto;
-    font-size: 14px;
-    line-height: 1.3em;
+.window-content{
+  flex:1;
+  padding:5px;
+  overflow-y:auto;
+  font-size:14px;
+  line-height:1.3em;
 }
-
 /* ============================= */
 /* КНОПКИ */
 /* ============================= */
-.button {
-    display: inline-block;
-    padding: 5px 15px;
-    margin: 3px;
-    color: #00ff00;
-    border: 1px solid #00ff00;
-    cursor: pointer;
-    transition: all 0.2s;
+.button{
+  display:inline-block;
+  padding:5px 15px;
+  margin:3px;
+  color:#00ff00;
+  border:1px solid #00ff00;
+  cursor:pointer;
+  transition:all 0.2s;
 }
-
-.button:hover {
-    background-color: #00ff00;
-    color: #0d0d0d;
+.button:hover{
+  background:#00ff00;
+  color:#0d0d0d;
 }
-
 /* ============================= */
-/* ЭФФЕКТЫ ТЕРМИНАЛА */
+/* МЕРЦАНИЕ И ГЛИТЧ */
 /* ============================= */
-.terminal-line {
-    display: block;
+@keyframes flicker{
+  0%,19%,21%,23%,25%,54%,56%,100%{opacity:1;}
+  20%,22%,24%,55%{opacity:0.4;}
 }
-
-.cursor {
-    display: inline-block;
-    width: 10px;
-    background-color: #00ff00;
-    animation: blink 1s infinite;
+.flicker{animation:flicker 1.5s infinite;}
+.glitch{
+  position:relative;
+  color:#00ff00;
+  font-weight:bold;
+  animation:glitch 2s infinite;
 }
-
-@keyframes blink {
-    0%,50%,100% { opacity:1; }
-    25%,75% { opacity:0; }
+@keyframes glitch{
+  0%{text-shadow:2px 0 red,-2px 0 cyan;}
+  20%{text-shadow:-2px 0 red,2px 0 cyan;}
+  40%{text-shadow:2px 2px red,-2px -2px cyan;}
+  60%{text-shadow:-2px 2px red,2px -2px cyan;}
+  80%{text-shadow:2px -2px red,-2px 2px cyan;}
+  100%{text-shadow:2px 0 red,-2px 0 cyan;}
 }
-
 /* ============================= */
-/* DRAGGING JS STYLE FIXES */
+/* ТЕРМИНАЛ */
 /* ============================= */
-.ui-draggable-dragging { z-index: 9999 !important; }
-
-/* ============================= */
-/* ДОПОЛНИТЕЛЬНЫЕ ЭФФЕКТЫ */
-/* ============================= */
-.glitch {
-    position: relative;
-    color: #00ff00;
-    font-weight: bold;
-    animation: glitch 2s infinite;
+.terminal-line{display:block;}
+.cursor{
+  display:inline-block;
+  width:10px;
+  background:#00ff00;
+  animation:blink 1s infinite;
 }
-
-@keyframes glitch {
-    0% { text-shadow: 2px 0 red, -2px 0 cyan; }
-    20% { text-shadow: -2px 0 red, 2px 0 cyan; }
-    40% { text-shadow: 2px 2px red, -2px -2px cyan; }
-    60% { text-shadow: -2px 2px red, 2px -2px cyan; }
-    80% { text-shadow: 2px -2px red, -2px 2px cyan; }
-    100% { text-shadow: 2px 0 red, -2px 0 cyan; }
+@keyframes blink{
+  0%,50%,100%{opacity:1;}
+  25%,75%{opacity:0;}
 }
-
 /* ============================= */
-/* ФОРМА АВТОРИЗАЦИИ */
+/* INPUT ФОРМ */
 /* ============================= */
-#loginWindow input {
-    width: calc(100% - 10px);
-    margin: 5px 0;
-    padding: 5px;
-    background-color: #0d0d0d;
-    border: 1px solid #00ff00;
-    color: #00ff00;
+#loginWindow input{
+  width:calc(100%-10px);
+  margin:5px 0;
+  padding:5px;
+  background:#0d0d0d;
+  border:1px solid #00ff00;
+  color:#00ff00;
 }
-#loginWindow input::placeholder {
-    color: #00ff00;
-    opacity: 0.5;
+#loginWindow input::placeholder{
+  color:#00ff00;
+  opacity:0.5;
 }
-
 /* ============================= */
-/* MATRIX BACKGROUND EFFECT */
+/* ALERT POPUPS */
 /* ============================= */
-#matrixCanvas {
-    position: absolute;
-    top:0;
-    left:0;
-    width:100%;
-    height:100%;
-    z-index:0;
+.alertWindow{
+  position:absolute;
+  width:300px;
+  height:100px;
+  background:#0a0a0a;
+  border:2px solid red;
+  box-shadow:0 0 15px red;
+  display:none;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  z-index:999;
+}
+.alertWindow p{color:red; font-weight:bold; text-align:center; font-size:16px;}
+.buttonCloseAlert{
+  margin-top:10px;
+  border:1px solid red;
+  padding:3px 10px;
+  cursor:pointer;
+  color:red;
+}
+.buttonCloseAlert:hover{
+  background:red;
+  color:#0d0d0d;
+}
+/* ============================= */
+/* CONTROL PANEL STYLES */
+/* ============================= */
+#controlPanel .button{
+  font-size:12px;
+  padding:5px 10px;
+  margin:2px;
+}
+/* ============================= */
+/* MULTI WINDOW ANIMATION */
+/* ============================= */
+.window.opening{
+  animation:openWindow 0.3s ease forwards;
+}
+@keyframes openWindow{
+  0%{transform:scale(0.8);opacity:0;}
+  100%{transform:scale(1);opacity:1;}
 }
 </style>
 </head>
 <body>
 <canvas id="matrixCanvas"></canvas>
 <div id="desktop">
-    <!-- ============================= -->
-    <!-- ОКНО АВТОРИЗАЦИИ -->
-    <!-- ============================= -->
-    <div class="window" id="loginWindow" style="top:50px; left:50px; z-index:5;">
-        <div class="window-header">
-            <span class="window-title">Authentication</span>
-            <div class="window-buttons">
-                <span class="close-btn" onclick="closeWindow('loginWindow')">X</span>
-            </div>
-        </div>
-        <div class="window-content">
-            <p class="flicker">Введите пароль для доступа:</p>
-            <input type="password" id="passwordInput" placeholder="Password">
-            <button class="button" onclick="checkPassword()">Войти</button>
-            <p id="loginMessage"></p>
-        </div>
+  <!-- ============================= -->
+  <!-- ОКНО АВТОРИЗАЦИИ -->
+  <!-- ============================= -->
+  <div class="window" id="loginWindow" style="top:50px; left:50px; z-index:10;">
+    <div class="window-header">
+      <span class="window-title">Authentication</span>
+      <div class="window-buttons">
+        <span class="close-btn" onclick="closeWindow('loginWindow')">X</span>
+      </div>
     </div>
+    <div class="window-content">
+      <p class="flicker">Введите пароль для доступа:</p>
+      <input type="password" id="passwordInput" placeholder="Password">
+      <button class="button" onclick="checkPassword()">Войти</button>
+      <p id="loginMessage"></p>
+    </div>
+  </div>
 
-    <!-- ============================= -->
-    <!-- ТЕРМИНАЛ -->
-    <!-- ============================= -->
-    <div class="window" id="terminalWindow" style="top:100px; left:500px; z-index:4;">
-        <div class="window-header">
-            <span class="window-title">Terminal</span>
-            <div class="window-buttons">
-                <span class="close-btn" onclick="closeWindow('terminalWindow')">X</span>
-            </div>
-        </div>
-        <div class="window-content" id="terminalContent">
-            <span class="terminal-line">> Loading modules...</span>
-            <span class="terminal-line">> Initializing cyber matrix...</span>
-            <span class="terminal-line">> Welcome, hacker!</span>
-            <span class="terminal-line"><span class="cursor"></span></span>
-        </div>
+  <!-- ============================= -->
+  <!-- TERMINAL WINDOWS (МНОГО) -->
+  <!-- ============================= -->
+  <div class="window opening" id="terminal1" style="top:100px; left:500px; z-index:9;">
+    <div class="window-header">
+      <span class="window-title">Terminal 1</span>
+      <div class="window-buttons">
+        <span class="close-btn" onclick="closeWindow('terminal1')">X</span>
+      </div>
     </div>
+    <div class="window-content" id="terminalContent1">
+      <span class="terminal-line">> Initializing...</span>
+      <span class="terminal-line"><span class="cursor"></span></span>
+    </div>
+  </div>
 
-    <!-- ============================= -->
-    <!-- ПАНЕЛЬ КНОПОК -->
-    <!-- ============================= -->
-    <div class="window" id="controlPanel" style="top:400px; left:50px; width: 300px; height: 200px; z-index:3;">
-        <div class="window-header">
-            <span class="window-title">Control Panel</span>
-            <div class="window-buttons">
-                <span class="close-btn" onclick="closeWindow('controlPanel')">X</span>
-            </div>
-        </div>
-        <div class="window-content">
-            <button class="button" onclick="addTerminalLine('Scanning ports...')">Scan Ports</button>
-            <button class="button" onclick="addTerminalLine('Bypassing firewall...')">Bypass Firewall</button>
-            <button class="button" onclick="addTerminalLine('Accessing server...')">Access Server</button>
-            <button class="button" onclick="addTerminalLine('Deploying exploit...')">Deploy Exploit</button>
-        </div>
+  <div class="window opening" id="terminal2" style="top:200px; left:800px; z-index:8;">
+    <div class="window-header">
+      <span class="window-title">Terminal 2</span>
+      <div class="window-buttons">
+        <span class="close-btn" onclick="closeWindow('terminal2')">X</span>
+      </div>
     </div>
+    <div class="window-content" id="terminalContent2">
+      <span class="terminal-line">> Booting modules...</span>
+      <span class="terminal-line"><span class="cursor"></span></span>
+    </div>
+  </div>
 
-    <!-- ============================= -->
-    <!-- ДОПОЛНИТЕЛЬНЫЕ ОКНА -->
-    <!-- ============================= -->
-    <div class="window" id="networkWindow" style="top:200px; left:900px; width:350px; height:250px; z-index:2;">
-        <div class="window-header">
-            <span class="window-title">Network Monitor</span>
-            <div class="window-buttons">
-                <span class="close-btn" onclick="closeWindow('networkWindow')">X</span>
-            </div>
-        </div>
-        <div class="window-content" id="networkContent">
-            <span class="terminal-line">> Scanning IPs...</span>
-            <span class="terminal-line">> Ping: 192.168.0.1 [OK]</span>
-            <span class="terminal-line">> Ping: 192.168.0.10 [OK]</span>
-        </div>
+  <div class="window opening" id="networkWindow" style="top:300px; left:300px; width:350px; height:250px; z-index:7;">
+    <div class="window-header">
+      <span class="window-title">Network Monitor</span>
+      <div class="window-buttons">
+        <span class="close-btn" onclick="closeWindow('networkWindow')">X</span>
+      </div>
     </div>
+    <div class="window-content" id="networkContent">
+      <span class="terminal-line">> Scanning IPs...</span>
+    </div>
+  </div>
 
-    <div class="window" id="logWindow" style="top:500px; left:500px; width:400px; height:200px; z-index:1;">
-        <div class="window-header">
-            <span class="window-title">System Log</span>
-            <div class="window-buttons">
-                <span class="close-btn" onclick="closeWindow('logWindow')">X</span>
-            </div>
-        </div>
-        <div class="window-content" id="logContent">
-            <span class="terminal-line">> SYSTEM STARTED</span>
-            <span class="terminal-line">> All modules active</span>
-        </div>
+  <div class="window opening" id="logWindow" style="top:500px; left:600px; width:400px; height:200px; z-index:6;">
+    <div class="window-header">
+      <span class="window-title">System Log</span>
+      <div class="window-buttons">
+        <span class="close-btn" onclick="closeWindow('logWindow')">X</span>
+      </div>
     </div>
+    <div class="window-content" id="logContent">
+      <span class="terminal-line">> SYSTEM STARTED</span>
+    </div>
+  </div>
+
+  <!-- ============================= -->
+  <!-- CONTROL PANEL -->
+  <!-- ============================= -->
+  <div class="window opening" id="controlPanel" style="top:400px; left:50px; width:300px; height:250px; z-index:5;">
+    <div class="window-header">
+      <span class="window-title">Control Panel</span>
+      <div class="window-buttons">
+        <span class="close-btn" onclick="closeWindow('controlPanel')">X</span>
+      </div>
+    </div>
+    <div class="window-content">
+      <button class="button" onclick="runCommand('Scan Ports')">Scan Ports</button>
+      <button class="button" onclick="runCommand('Bypass Firewall')">Bypass Firewall</button>
+      <button class="button" onclick="runCommand('Access Server')">Access Server</button>
+      <button class="button" onclick="runCommand('Deploy Exploit')">Deploy Exploit</button>
+      <button class="button" onclick="runCommand('Reboot System')">Reboot System</button>
+      <button class="button" onclick="runCommand('Delete Logs')">Delete Logs</button>
+    </div>
+  </div>
+
+  <!-- ============================= -->
+  <!-- ALERT POPUP -->
+  <!-- ============================= -->
+  <div class="alertWindow" id="alertWindow" style="top:200px; left:600px;">
+    <p id="alertText">Alert!</p>
+    <div class="buttonCloseAlert" onclick="closeAlert()">Close</div>
+  </div>
 </div>
 
 <script>
 /* ============================= */
 /* MATRIX BACKGROUND JS */
 /* ============================= */
-const canvas = document.getElementById('matrixCanvas');
-const ctx = canvas.getContext('2d');
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()*&^%';
-const fontSize = 16;
-const columns = canvas.width / fontSize;
-const drops = [];
-for(let x = 0; x < columns; x++) drops[x] = 1;
-
-function drawMatrix() {
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#00ff00';
-    ctx.font = fontSize + 'px monospace';
-    for(let i = 0; i < drops.length; i++) {
-        const text = letters.charAt(Math.floor(Math.random() * letters.length));
-        ctx.fillText(text, i*fontSize, drops[i]*fontSize);
-        if(drops[i]*fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
-        drops[i]++;
-    }
+const canvas=document.getElementById('matrixCanvas');
+const ctx=canvas.getContext('2d');
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+const letters='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()*&^%';
+const fontSize=16;
+const columns=canvas.width/fontSize;
+const drops=[];
+for(let x=0;x<columns;x++) drops[x]=1;
+function drawMatrix(){
+  ctx.fillStyle='rgba(0,0,0,0.05)';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle='#00ff00';
+  ctx.font=fontSize+'px monospace';
+  for(let i=0;i<drops.length;i++){
+    const text=letters.charAt(Math.floor(Math.random()*letters.length));
+    ctx.fillText(text,i*fontSize,drops[i]*fontSize);
+    if(drops[i]*fontSize>canvas.height&&Math.random()>0.975)drops[i]=0;
+    drops[i]++;
+  }
 }
-setInterval(drawMatrix, 50);
+setInterval(drawMatrix,50);
 
 /* ============================= */
 /* ОКНА */
 /* ============================= */
-function closeWindow(id) { document.getElementById(id).style.display='none'; }
-function checkPassword() {
-    const pw = document.getElementById('passwordInput').value;
-    const msg = document.getElementById('loginMessage');
-    if(pw === 'yamaoki') { msg.textContent='Доступ разрешен!'; msg.style.color='#00ff00'; document.getElementById('loginWindow').style.display='none'; } 
-    else { msg.textContent='Неверный пароль!'; msg.style.color='red'; }
+function closeWindow(id){document.getElementById(id).style.display='none';}
+function openWindow(id){document.getElementById(id).style.display='flex';}
+
+/* ============================= */
+/* AUTHORIZATION */
+function checkPassword(){
+  const pw=document.getElementById('passwordInput').value;
+  const msg=document.getElementById('loginMessage');
+  if(pw==='yamaoki'){msg.textContent='Доступ разрешен!';msg.style.color='#00ff00';closeWindow('loginWindow');} 
+  else{msg.textContent='Неверный пароль!';msg.style.color='red';}
 }
 
 /* ============================= */
-/* TERMINAL SIMULATION */
-/* ============================= */
-function addTerminalLine(text) {
-    const terminal = document.getElementById('terminalContent');
-    const line = document.createElement('span');
-    line.className='terminal-line';
-    line.textContent='> '+text;
-    terminal.appendChild(line);
-    terminal.scrollTop=terminal.scrollHeight;
+/* TERMINAL FUNCTIONS */
+function addTerminalLine(content,terminalId){
+  const terminal=document.getElementById(terminalId);
+  const line=document.createElement('span');
+  line.className='terminal-line';
+  line.textContent='> '+content;
+  terminal.appendChild(line);
+  terminal.scrollTop=terminal.scrollHeight;
 }
+function runCommand(cmd){
+  addTerminalLine(cmd,'terminalContent1');
+  addTerminalLine(cmd,'terminalContent2');
+  addTerminalLine(cmd,'networkContent');
+  addTerminalLine(cmd,'logContent');
+  showAlert(cmd+' executed!');
+}
+
+/* ============================= */
+/* ALERTS */
+function showAlert(msg){
+  const alertWin=document.getElementById('alertWindow');
+  document.getElementById('alertText').textContent=msg;
+  alertWin.style.display='flex';
+}
+function closeAlert(){document.getElementById('alertWindow').style.display='none';}
 
 /* ============================= */
 /* DRAG & DROP WINDOWS */
-/* ============================= */
 let dragItem=null, offsetX=0, offsetY=0;
 document.querySelectorAll('.window-header').forEach(header=>{
-    header.addEventListener('mousedown',e=>{
-        dragItem=header.parentElement;
-        offsetX=e.clientX-dragItem.offsetLeft;
-        offsetY=e.clientY-dragItem.offsetTop;
-        dragItem.style.zIndex=1000;
-    });
+  header.addEventListener('mousedown',e=>{
+    dragItem=header.parentElement;
+    offsetX=e.clientX-dragItem.offsetLeft;
+    offsetY=e.clientY-dragItem.offsetTop;
+    dragItem.style.zIndex=1000;
+  });
 });
 document.addEventListener('mousemove',e=>{
-    if(dragItem){
-        dragItem.style.left=(e.clientX-offsetX)+'px';
-        dragItem.style.top=(e.clientY-offsetY)+'px';
-    }
+  if(dragItem){
+    dragItem.style.left=(e.clientX-offsetX)+'px';
+    dragItem.style.top=(e.clientY-offsetY)+'px';
+  }
 });
-document.addEventListener('mouseup',()=>{ if(dragItem) dragItem.style.zIndex=1; dragItem=null; });
+document.addEventListener('mouseup',()=>{if(dragItem) dragItem.style.zIndex=1; dragItem=null;});
 
 /* ============================= */
-/* BUTTON ACTIONS */
-document.querySelectorAll('#controlPanel .button').forEach(btn=>{
-    btn.addEventListener('click',()=>{ addTerminalLine('Command executed: '+btn.textContent); });
-});
+/* DYNAMIC LOG GENERATOR */
+const fakeLogs=[
+  'Connecting to 192.168.0.1...',
+  'Accessing admin panel...',
+  'Firewall bypassed.',
+  'Database injection success.',
+  'Password hash found.',
+  'Uploading payload...',
+  'System reboot required.',
+  'User created: hacker01',
+  'Deleting logs...',
+  'Scanning ports...'
+];
+setInterval(()=>{
+  const log=fakeLogs[Math.floor(Math.random()*fakeLogs.length)];
+  addTerminalLine(log,'logContent');
+},3000);
 
 /* ============================= */
-/* ADDITIONAL EFFECTS */
-// Placeholder for future expansions: multiple terminals, popups, alert simulations
+/* DYNAMIC NETWORK SCAN */
+const fakeIPs=['192.168.0.10','192.168.0.15','192.168.0.20','192.168.0.33'];
+setInterval(()=>{
+  const ip=fakeIPs[Math.floor(Math.random()*fakeIPs.length)];
+  addTerminalLine('Ping: '+ip+' [OK]','networkContent');
+},4000);
+
+/* ============================= */
+/* MORE COMMANDS PLACEHOLDER */
+// можно добавить сотни команд для терминалов
 </script>
 </body>
 </html>
+
 
 
 
