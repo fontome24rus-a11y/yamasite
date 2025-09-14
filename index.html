@@ -15,6 +15,17 @@
       overflow: hidden;
     }
 
+    /* Фон "матрица-дождь" */
+    #matrixCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: -1;
+      width: 100%;
+      height: 100%;
+      background: black;
+    }
+
     /* Экран загрузки */
     #loading {
       display: flex;
@@ -44,6 +55,7 @@
       color: white;
       text-align: center;
       width: 300px;
+      z-index: 1001;
     }
     #loginWindow input {
       width: 90%;
@@ -64,11 +76,10 @@
       display: none;
       width: 100%;
       height: 100%;
-      background: url('https://i.pinimg.com/736x/a4/2a/a5/a42aa5b3a202d20a8ea54e594f1315e2.jpg') no-repeat center center;
-      background-size: cover;
       position: relative;
       color: white;
       padding: 20px;
+      z-index: 1;
     }
 
     .icon {
@@ -94,11 +105,12 @@
       width: 600px;
       height: 500px;
       background: #222;
-      color: #00ff00; /* зелёный текст как консоль */
+      color: #00ff00;
       border: 2px solid #555;
       display: none;
       flex-direction: column;
       font-family: monospace;
+      z-index: 1000;
     }
 
     .window-header {
@@ -137,14 +149,26 @@
       font-size: 14px;
     }
 
-    .window-content iframe {
+    /* Панель задач */
+    #taskbar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
       width: 100%;
-      height: 100%;
-      border: none;
+      background: #111;
+      border-top: 2px solid #333;
+      color: #00ff00;
+      padding: 5px 10px;
+      font-size: 14px;
+      display: flex;
+      justify-content: flex-end;
+      z-index: 1002;
     }
   </style>
 </head>
 <body>
+  <canvas id="matrixCanvas"></canvas>
+
   <!-- Экран загрузки -->
   <div id="loading">
     <div id="console"></div>
@@ -174,73 +198,95 @@
       <img src="https://img.icons8.com/color/96/ball.png" alt="Pinball">
       <span>Pinball</span>
     </div>
-    <!-- NEW: иконка взлома -->
     <div class="icon" onclick="openHack()">
       <img src="https://img.icons8.com/fluency/96/command-line.png" alt="Hack">
-      <span>взлом жопы минамото</span>
+      <span>Консоль</span>
     </div>
+  </div>
 
-    <!-- Окна -->
-    <div id="doc1" class="window">
-      <div class="window-header">
-        Документ 1
-        <div class="controls">
-          <button class="max-btn" onclick="toggleMaximize('doc1')">[]</button>
-          <button class="close-btn" onclick="closeWindow('doc1')">X</button>
-        </div>
-      </div>
-      <div class="window-content">
-        <a href="https://docs.google.com/document/d/1Y6DRS1MohZX0iOjmxPQ00dUmBa-VnthWRDAiNuDU78I/edit?tab=t.0" target="_blank">документ с реворком</a>
-      </div>
-    </div>
+  <!-- Панель задач -->
+  <div id="taskbar">00:00</div>
 
-    <div id="doc2" class="window">
-      <div class="window-header">
-        Документ 2
-        <div class="controls">
-          <button class="max-btn" onclick="toggleMaximize('doc2')">[]</button>
-          <button class="close-btn" onclick="closeWindow('doc2')">X</button>
-        </div>
-      </div>
-      <div class="window-content">
-        Тут текст или содержимое документа №2.
+  <!-- Окна -->
+  <div id="doc1" class="window">
+    <div class="window-header">
+      Документ 1
+      <div class="controls">
+        <button class="max-btn" onclick="toggleMaximize('doc1')">[]</button>
+        <button class="close-btn" onclick="closeWindow('doc1')">X</button>
       </div>
     </div>
+    <div class="window-content">
+      <a href="https://docs.google.com/" target="_blank">Google Docs</a>
+    </div>
+  </div>
 
-    <div id="pinball" class="window">
-      <div class="window-header">
-        Pinball
-        <div class="controls">
-          <button class="max-btn" onclick="toggleMaximize('pinball')">[]</button>
-          <button class="close-btn" onclick="closeWindow('pinball')">X</button>
-        </div>
-      </div>
-      <div class="window-content">
-        <iframe src="https://funhtml5games.com?embed=pinball" allowfullscreen></iframe>
+  <div id="doc2" class="window">
+    <div class="window-header">
+      Документ 2
+      <div class="controls">
+        <button class="max-btn" onclick="toggleMaximize('doc2')">[]</button>
+        <button class="close-btn" onclick="closeWindow('doc2')">X</button>
       </div>
     </div>
+    <div class="window-content">Тут текст или содержимое документа №2.</div>
+  </div>
 
-    <!-- NEW: окно взлома -->
-    <div id="hack" class="window">
-      <div class="window-header">
-        Консоль
-        <div class="controls">
-          <button class="max-btn" onclick="toggleMaximize('hack')">[]</button>
-          <button class="close-btn" onclick="closeWindow('hack')">X</button>
-        </div>
+  <div id="pinball" class="window">
+    <div class="window-header">
+      Pinball
+      <div class="controls">
+        <button class="max-btn" onclick="toggleMaximize('pinball')">[]</button>
+        <button class="close-btn" onclick="closeWindow('pinball')">X</button>
       </div>
-      <div class="window-content" id="hackContent"></div>
+    </div>
+    <div class="window-content">
+      <iframe src="https://funhtml5games.com?embed=pinball" allowfullscreen></iframe>
+    </div>
+  </div>
+
+  <div id="hack" class="window">
+    <div class="window-header">
+      Консоль
+      <div class="controls">
+        <button class="max-btn" onclick="toggleMaximize('hack')">[]</button>
+        <button class="close-btn" onclick="closeWindow('hack')">X</button>
+      </div>
+    </div>
+    <div class="window-content">
+      <pre id="hackContent">C:\></pre>
+      <input type="text" id="hackInput" style="width:100%; background:black; border:none; color:#00ff00; font-family:monospace;">
     </div>
   </div>
 
   <script>
-    // Эффект печатания на экране загрузки
-    const messages = [
-      "Connecting to database...",
-      "Authorizing...",
-      "Fetching data...",
-      "Access granted."
-    ];
+    /* Матрица */
+    const canvas = document.getElementById('matrixCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.height = window.innerHeight;
+    canvas.width = window.innerWidth;
+
+    const letters = "01";
+    const fontSize = 14;
+    const columns = canvas.width / fontSize;
+    const drops = Array.from({length: columns}).fill(1);
+
+    function drawMatrix() {
+      ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#0F0";
+      ctx.font = fontSize + "px monospace";
+      drops.forEach((y, i) => {
+        const text = letters.charAt(Math.floor(Math.random() * letters.length));
+        ctx.fillText(text, i * fontSize, y * fontSize);
+        if (y * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+        drops[i]++;
+      });
+    }
+    setInterval(drawMatrix, 50);
+
+    /* Эффект печатания */
+    const messages = ["Connecting to database...", "Authorizing...", "Fetching data...", "Access granted."];
     let consoleDiv = document.getElementById("console");
     let idx = 0;
 
@@ -267,10 +313,9 @@
     }
     typeLine();
 
-    // Проверка пароля
+    /* Пароль */
     function checkPassword() {
-      const input = document.getElementById("passwordInput").value;
-      if (input === "yamaoki") {
+      if (document.getElementById("passwordInput").value === "yamaoki") {
         document.getElementById("loginWindow").style.display = "none";
         document.getElementById("desktop").style.display = "block";
       } else {
@@ -278,38 +323,31 @@
       }
     }
 
-    // Открытие/закрытие окон
+    /* Окна */
     function openWindow(id) {
       document.getElementById(id).style.display = "flex";
+      beep();
     }
     function closeWindow(id) {
       document.getElementById(id).style.display = "none";
     }
 
-    // NEW: запуск консоли
+    /* Консоль */
     function openHack() {
-      const win = document.getElementById("hack");
-      win.style.display = "flex";
-      const content = document.getElementById("hackContent");
-      content.textContent = "C:\\>dir /s\n\n";
-      let lines = [];
-      for (let i = 0; i < 200; i++) {
-        lines.push("Файл_" + i + ".dll");
-      }
-      let i = 0;
-      let interval = setInterval(() => {
-        if (i < lines.length) {
-          content.textContent += lines[i] + "\n";
-          content.scrollTop = content.scrollHeight;
-          i++;
-        } else {
-          clearInterval(interval);
-          content.textContent += "\nВзлом завершен.";
-        }
-      }, 20);
+      document.getElementById("hack").style.display = "flex";
+      beep();
     }
+    document.getElementById("hackInput").addEventListener("keydown", e => {
+      if (e.key === "Enter") {
+        const cmd = e.target.value;
+        const content = document.getElementById("hackContent");
+        content.textContent += cmd + "\nОтвет системы: OK\nC:\\>";
+        e.target.value = "";
+        content.scrollTop = content.scrollHeight;
+      }
+    });
 
-    // Максимизация окна
+    /* Максимизация */
     const maximized = {};
     function toggleMaximize(id) {
       const win = document.getElementById(id);
@@ -332,11 +370,10 @@
       }
     }
 
-    // Перетаскивание окон
+    /* Перетаскивание */
     document.querySelectorAll('.window').forEach(win => {
       const header = win.querySelector('.window-header');
       let offsetX = 0, offsetY = 0, isDown = false;
-
       header.addEventListener('mousedown', e => {
         if (e.target.classList.contains("close-btn") || e.target.classList.contains("max-btn")) return;
         isDown = true;
@@ -344,11 +381,7 @@
         offsetY = e.clientY - win.offsetTop;
         win.style.zIndex = 1000;
       });
-
-      document.addEventListener('mouseup', () => {
-        isDown = false;
-      });
-
+      document.addEventListener('mouseup', () => isDown = false);
       document.addEventListener('mousemove', e => {
         if (isDown && !maximized[win.id]) {
           win.style.left = (e.clientX - offsetX) + 'px';
@@ -356,6 +389,27 @@
         }
       });
     });
+
+    /* Часы на панели */
+    function updateClock() {
+      const now = new Date();
+      document.getElementById("taskbar").textContent =
+        now.getHours().toString().padStart(2,"0") + ":" +
+        now.getMinutes().toString().padStart(2,"0");
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    /* Звуковой эффект */
+    function beep() {
+      const ctx = new AudioContext();
+      const osc = ctx.createOscillator();
+      osc.type = "square";
+      osc.frequency.value = 600;
+      osc.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.1);
+    }
   </script>
 </body>
 </html>
