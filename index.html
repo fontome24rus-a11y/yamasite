@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Yamaoki</title>
+  <title>Yamaoki — Hacker OS</title>
   <style>
     body, html {
       margin: 0;
@@ -23,6 +23,8 @@
       height: 100vh;
       flex-direction: column;
       font-size: 20px;
+      background: radial-gradient(circle, #001100, black);
+      color: #00ff00;
     }
 
     #console {
@@ -38,25 +40,29 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      background: #222;
-      border: 2px solid #555;
+      background: #111;
+      border: 2px solid #00ff00;
       padding: 20px;
-      color: white;
+      color: #00ff00;
       text-align: center;
-      width: 300px;
+      width: 320px;
+      box-shadow: 0 0 20px #00ff00;
     }
     #loginWindow input {
       width: 90%;
       padding: 8px;
       margin: 10px 0;
-      border: none;
-      outline: none;
+      border: 1px solid #00ff00;
+      background: black;
+      color: #00ff00;
     }
     #loginWindow button {
       padding: 5px 15px;
       background: #00ff00;
       border: none;
       cursor: pointer;
+      color: black;
+      font-weight: bold;
     }
 
     /* Рабочий стол */
@@ -86,29 +92,31 @@
       margin: 0 auto;
     }
 
-    /* Окно */
+    /* Окна */
     .window {
       position: absolute;
       top: 100px;
       left: 100px;
       width: 600px;
       height: 500px;
-      background: #222;
-      color: #00ff00; /* зелёный текст как консоль */
-      border: 2px solid #555;
+      background: #111;
+      color: #00ff00;
+      border: 2px solid #00ff00;
       display: none;
       flex-direction: column;
       font-family: monospace;
+      box-shadow: 0 0 20px #00ff00;
     }
 
     .window-header {
-      background: #444;
+      background: #222;
       padding: 5px;
       cursor: move;
       display: flex;
       justify-content: space-between;
       align-items: center;
       user-select: none;
+      border-bottom: 1px solid #00ff00;
     }
 
     .window-header .controls {
@@ -119,14 +127,14 @@
     .close-btn, .max-btn {
       background: #333;
       border: none;
-      color: white;
+      color: #00ff00;
       cursor: pointer;
       width: 25px;
       height: 25px;
+      font-weight: bold;
     }
-
-    .close-btn:hover { background: red; }
-    .max-btn:hover { background: #00aa00; }
+    .close-btn:hover { background: red; color: black; }
+    .max-btn:hover { background: #00aa00; color: black; }
 
     .window-content {
       padding: 10px;
@@ -137,14 +145,20 @@
       font-size: 14px;
     }
 
-    .window-content iframe {
+    /* Matrix rain */
+    canvas#matrix {
+      position: fixed;
+      top: 0;
+      left: 0;
       width: 100%;
       height: 100%;
-      border: none;
+      z-index: -1;
     }
   </style>
 </head>
 <body>
+  <canvas id="matrix"></canvas>
+
   <!-- Экран загрузки -->
   <div id="loading">
     <div id="console"></div>
@@ -153,7 +167,7 @@
   <!-- Окно авторизации -->
   <div id="loginWindow">
     <h3>Авторизация</h3>
-    <p>Введите пароль для входа:</p>
+    <p>Введите пароль:</p>
     <input type="password" id="passwordInput" placeholder="Пароль">
     <br>
     <button onclick="checkPassword()">Войти</button>
@@ -170,193 +184,97 @@
       <img src="https://img.icons8.com/fluency/96/document.png" alt="doc">
       <span>Документ 2</span>
     </div>
-    <div class="icon" onclick="openWindow('pinball')">
-      <img src="https://img.icons8.com/color/96/ball.png" alt="Pinball">
-      <span>Pinball</span>
-    </div>
-    <!-- NEW: иконка взлома -->
-    <div class="icon" onclick="openHack()">
+    <div class="icon" onclick="openWindow('hack')">
       <img src="https://img.icons8.com/fluency/96/command-line.png" alt="Hack">
-      <span>взлом жопы минамото</span>
+      <span>Консоль</span>
     </div>
 
-    <!-- Окна -->
     <div id="doc1" class="window">
-      <div class="window-header">
-        Документ 1
-        <div class="controls">
-          <button class="max-btn" onclick="toggleMaximize('doc1')">[]</button>
-          <button class="close-btn" onclick="closeWindow('doc1')">X</button>
-        </div>
-      </div>
-      <div class="window-content">
-        <a href="https://docs.google.com/document/d/1Y6DRS1MohZX0iOjmxPQ00dUmBa-VnthWRDAiNuDU78I/edit?tab=t.0" target="_blank">документ с реворком</a>
-      </div>
+      <div class="window-header">Документ 1<div class="controls"><button class="max-btn" onclick="toggleMaximize('doc1')">[]</button><button class="close-btn" onclick="closeWindow('doc1')">X</button></div></div>
+      <div class="window-content"><a href="#" target="_blank">Текст документа 1</a></div>
     </div>
 
     <div id="doc2" class="window">
-      <div class="window-header">
-        Документ 2
-        <div class="controls">
-          <button class="max-btn" onclick="toggleMaximize('doc2')">[]</button>
-          <button class="close-btn" onclick="closeWindow('doc2')">X</button>
-        </div>
-      </div>
-      <div class="window-content">
-        Тут текст или содержимое документа №2.
-      </div>
+      <div class="window-header">Документ 2<div class="controls"><button class="max-btn" onclick="toggleMaximize('doc2')">[]</button><button class="close-btn" onclick="closeWindow('doc2')">X</button></div></div>
+      <div class="window-content">Текст документа 2</div>
     </div>
 
-    <div id="pinball" class="window">
-      <div class="window-header">
-        Pinball
-        <div class="controls">
-          <button class="max-btn" onclick="toggleMaximize('pinball')">[]</button>
-          <button class="close-btn" onclick="closeWindow('pinball')">X</button>
-        </div>
-      </div>
-      <div class="window-content">
-        <iframe src="https://funhtml5games.com?embed=pinball" allowfullscreen></iframe>
-      </div>
-    </div>
-
-    <!-- NEW: окно взлома -->
     <div id="hack" class="window">
-      <div class="window-header">
-        Консоль
-        <div class="controls">
-          <button class="max-btn" onclick="toggleMaximize('hack')">[]</button>
-          <button class="close-btn" onclick="closeWindow('hack')">X</button>
-        </div>
-      </div>
-      <div class="window-content" id="hackContent"></div>
+      <div class="window-header">Консоль<div class="controls"><button class="max-btn" onclick="toggleMaximize('hack')">[]</button><button class="close-btn" onclick="closeWindow('hack')">X</button></div></div>
+      <div class="window-content" id="hackContent">C:\> </div>
     </div>
   </div>
 
   <script>
-    // Эффект печатания на экране загрузки
-    const messages = [
-      "Connecting to database...",
-      "Authorizing...",
-      "Fetching data...",
-      "Access granted."
-    ];
-    let consoleDiv = document.getElementById("console");
-    let idx = 0;
-
-    function typeLine() {
-      if (idx < messages.length) {
-        let line = messages[idx];
-        let i = 0;
-        let interval = setInterval(() => {
-          consoleDiv.textContent += line[i];
-          i++;
-          if (i >= line.length) {
-            clearInterval(interval);
-            consoleDiv.textContent += "\n";
-            idx++;
-            setTimeout(typeLine, 500);
-          }
-        }, 50);
-      } else {
-        setTimeout(() => {
-          document.getElementById("loading").style.display = "none";
-          document.getElementById("loginWindow").style.display = "block";
-        }, 1000);
+    // Matrix rain effect
+    const canvas = document.getElementById('matrix');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()*&^%'.split('');
+    const fontSize = 16;
+    const columns = canvas.width / fontSize;
+    const drops = Array(Math.floor(columns)).fill(0);
+    function drawMatrix() {
+      ctx.fillStyle = 'rgba(0,0,0,0.05)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#00ff00';
+      ctx.font = fontSize + 'px monospace';
+      for (let i = 0; i < drops.length; i++) {
+        const text = letters[Math.floor(Math.random() * letters.length)];
+        ctx.fillText(text, i*fontSize, drops[i]*fontSize);
+        drops[i] = drops[i]*fontSize > canvas.height && Math.random() > 0.975 ? 0 : drops[i]+1;
       }
+    }
+    setInterval(drawMatrix, 50);
+
+    // Loading screen typing effect
+    const messages = ["Connecting...","Authorizing...","Loading modules...","Access granted."];
+    let consoleDiv = document.getElementById("console"), idx=0;
+    function typeLine(){
+      if(idx<messages.length){
+        let line=messages[idx], i=0;
+        let interval=setInterval(()=>{
+          consoleDiv.textContent+=line[i];
+          i++; if(i>=line.length){clearInterval(interval);consoleDiv.textContent+="\n";idx++;setTimeout(typeLine,300);}
+        },30);
+      } else {setTimeout(()=>{document.getElementById("loading").style.display="none";document.getElementById("loginWindow").style.display="block";},500);}
     }
     typeLine();
 
-    // Проверка пароля
-    function checkPassword() {
-      const input = document.getElementById("passwordInput").value;
-      if (input === "yamaoki") {
-        document.getElementById("loginWindow").style.display = "none";
-        document.getElementById("desktop").style.display = "block";
-      } else {
-        document.getElementById("error").style.display = "block";
-      }
+    // Password check
+    function checkPassword(){
+      const input=document.getElementById("passwordInput").value;
+      if(input==="yamaoki"){document.getElementById("loginWindow").style.display="none";document.getElementById("desktop").style.display="block";}
+      else{document.getElementById("error").style.display="block";}
     }
 
-    // Открытие/закрытие окон
-    function openWindow(id) {
-      document.getElementById(id).style.display = "flex";
-    }
-    function closeWindow(id) {
-      document.getElementById(id).style.display = "none";
-    }
-
-    // NEW: запуск консоли
-    function openHack() {
-      const win = document.getElementById("hack");
-      win.style.display = "flex";
-      const content = document.getElementById("hackContent");
-      content.textContent = "C:\\>dir /s\n\n";
-      let lines = [];
-      for (let i = 0; i < 200; i++) {
-        lines.push("Файл_" + i + ".dll");
-      }
-      let i = 0;
-      let interval = setInterval(() => {
-        if (i < lines.length) {
-          content.textContent += lines[i] + "\n";
-          content.scrollTop = content.scrollHeight;
-          i++;
-        } else {
-          clearInterval(interval);
-          content.textContent += "\nВзлом завершен.";
-        }
-      }, 20);
-    }
-
-    // Максимизация окна
+    // Windows management
+    function openWindow(id){document.getElementById(id).style.display="flex";}
+    function closeWindow(id){document.getElementById(id).style.display="none";}
     const maximized = {};
-    function toggleMaximize(id) {
-      const win = document.getElementById(id);
-      if (!maximized[id]) {
-        win.dataset.prevLeft = win.style.left;
-        win.dataset.prevTop = win.style.top;
-        win.dataset.prevWidth = win.style.width;
-        win.dataset.prevHeight = win.style.height;
-        win.style.left = "0px";
-        win.style.top = "0px";
-        win.style.width = "100%";
-        win.style.height = "100%";
-        maximized[id] = true;
+    function toggleMaximize(id){
+      const win=document.getElementById(id);
+      if(!maximized[id]){
+        win.dataset.prevLeft=win.style.left;win.dataset.prevTop=win.style.top;
+        win.dataset.prevWidth=win.style.width;win.dataset.prevHeight=win.style.height;
+        win.style.left='0px';win.style.top='0px';win.style.width='100%';win.style.height='100%';maximized[id]=true;
       } else {
-        win.style.left = win.dataset.prevLeft;
-        win.style.top = win.dataset.prevTop;
-        win.style.width = win.dataset.prevWidth;
-        win.style.height = win.dataset.prevHeight;
-        maximized[id] = false;
+        win.style.left=win.dataset.prevLeft;win.style.top=win.dataset.prevTop;
+        win.style.width=win.dataset.prevWidth;win.style.height=win.dataset.prevHeight;maximized[id]=false;
       }
     }
 
-    // Перетаскивание окон
-    document.querySelectorAll('.window').forEach(win => {
-      const header = win.querySelector('.window-header');
-      let offsetX = 0, offsetY = 0, isDown = false;
-
-      header.addEventListener('mousedown', e => {
-        if (e.target.classList.contains("close-btn") || e.target.classList.contains("max-btn")) return;
-        isDown = true;
-        offsetX = e.clientX - win.offsetLeft;
-        offsetY = e.clientY - win.offsetTop;
-        win.style.zIndex = 1000;
-      });
-
-      document.addEventListener('mouseup', () => {
-        isDown = false;
-      });
-
-      document.addEventListener('mousemove', e => {
-        if (isDown && !maximized[win.id]) {
-          win.style.left = (e.clientX - offsetX) + 'px';
-          win.style.top = (e.clientY - offsetY) + 'px';
-        }
-      });
+    // Dragging windows
+    document.querySelectorAll('.window').forEach(win=>{
+      const header=win.querySelector('.window-header');
+      let offsetX=0,offsetY=0,isDown=false;
+      header.addEventListener('mousedown', e=>{if(e.target.classList.contains('close-btn')||e.target.classList.contains('max-btn')) return;isDown=true;offsetX=e.clientX-win.offsetLeft;offsetY=e.clientY-win.offsetTop;win.style.zIndex=1000;});
+      document.addEventListener('mouseup',()=>{isDown=false;});
+      document.addEventListener('mousemove',e=>{if(isDown&&!maximized[win.id]){win.style.left=(e.clientX-offsetX)+'px';win.style.top=(e.clientY-offsetY)+'px';}});
     });
   </script>
 </body>
 </html>
+
 
