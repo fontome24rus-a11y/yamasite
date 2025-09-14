@@ -133,4 +133,49 @@
     </div>
   </div>
 
+  <script>
+    // Эффект печатания на экране загрузки
+    const messages = [
+      "Connecting to database...",
+      "Authorizing...",
+      "Fetching data...",
+      "Access granted."
+    ];
+    let consoleDiv = document.getElementById("console");
+    let idx = 0;
+
+    function typeLine() {
+      if (idx < messages.length) {
+        let line = messages[idx];
+        let i = 0;
+        let interval = setInterval(() => {
+          consoleDiv.textContent += line[i];
+          i++;
+          if (i >= line.length) {
+            clearInterval(interval);
+            consoleDiv.textContent += "\n";
+            idx++;
+            setTimeout(typeLine, 500);
+          }
+        }, 50);
+      } else {
+        setTimeout(() => {
+          document.getElementById("loading").style.display = "none";
+          document.getElementById("desktop").style.display = "block";
+        }, 1000);
+      }
+    }
+    typeLine();
+
+    // Открытие/закрытие окон
+    function openWindow(id) {
+      document.getElementById(id).style.display = "flex";
+    }
+    function closeWindow(id) {
+      document.getElementById(id).style.display = "none";
+    }
+  </script>
+</body>
+
+</html>
 
