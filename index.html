@@ -1,280 +1,358 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>Yamaoki — Hacker OS</title>
-  <style>
-    body, html {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      font-family: monospace;
-      background: black;
-      color: #00ff00;
-      overflow: hidden;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yamaoki Hacker</title>
+<style>
+/* ============================= */
+/* ГЛОБАЛЬНЫЕ СТИЛИ */
+/* ============================= */
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    font-family: 'Courier New', monospace;
+    background-color: #0d0d0d;
+    color: #00ff00;
+    overflow: hidden;
+}
 
-    /* Экран загрузки */
-    #loading {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      flex-direction: column;
-      font-size: 20px;
-      background: radial-gradient(circle, #001100, black);
-      color: #00ff00;
-    }
+/* ============================= */
+/* ЭФФЕКТ МЕРЦАЮЩЕГО ТЕКСТА */
+/* ============================= */
+@keyframes flicker {
+    0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; }
+    20%, 22%, 24%, 55% { opacity: 0.4; }
+}
 
-    #console {
-      white-space: pre;
-      text-align: left;
-      max-width: 600px;
-    }
+.flicker { animation: flicker 1.5s infinite; }
 
-    /* Окно авторизации */
-    #loginWindow {
-      display: none;
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: #111;
-      border: 2px solid #00ff00;
-      padding: 20px;
-      color: #00ff00;
-      text-align: center;
-      width: 320px;
-      box-shadow: 0 0 20px #00ff00;
-    }
-    #loginWindow input {
-      width: 90%;
-      padding: 8px;
-      margin: 10px 0;
-      border: 1px solid #00ff00;
-      background: black;
-      color: #00ff00;
-    }
-    #loginWindow button {
-      padding: 5px 15px;
-      background: #00ff00;
-      border: none;
-      cursor: pointer;
-      color: black;
-      font-weight: bold;
-    }
+/* ============================= */
+/* ОСНОВНОЙ КОНТЕЙНЕР */
+/* ============================= */
+#desktop {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 50% 50%, #001a00 0%, #0d0d0d 100%);
+    overflow: hidden;
+}
 
-    /* Рабочий стол */
-    #desktop {
-      display: none;
-      width: 100%;
-      height: 100%;
-      background: url('https://i.pinimg.com/736x/a4/2a/a5/a42aa5b3a202d20a8ea54e594f1315e2.jpg') no-repeat center center;
-      background-size: cover;
-      position: relative;
-      color: white;
-      padding: 20px;
-    }
+/* ============================= */
+/* ОКНА */
+/* ============================= */
+.window {
+    position: absolute;
+    width: 400px;
+    height: 300px;
+    background-color: #0a0a0a;
+    border: 2px solid #00ff00;
+    box-shadow: 0 0 20px #00ff00;
+    resize: both;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
 
-    .icon {
-      width: 80px;
-      text-align: center;
-      cursor: pointer;
-      display: inline-block;
-      margin: 20px;
-    }
+.window-header {
+    height: 30px;
+    background-color: #001a00;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 5px;
+    cursor: move;
+}
 
-    .icon img {
-      width: 64px;
-      height: 64px;
-      display: block;
-      margin: 0 auto;
-    }
+.window-title {
+    font-weight: bold;
+    color: #00ff00;
+}
 
-    /* Окна */
-    .window {
-      position: absolute;
-      top: 100px;
-      left: 100px;
-      width: 600px;
-      height: 500px;
-      background: #111;
-      color: #00ff00;
-      border: 2px solid #00ff00;
-      display: none;
-      flex-direction: column;
-      font-family: monospace;
-      box-shadow: 0 0 20px #00ff00;
-    }
+.window-buttons span {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    text-align: center;
+    line-height: 20px;
+    border: 1px solid #00ff00;
+    margin-left: 2px;
+    cursor: pointer;
+}
 
-    .window-header {
-      background: #222;
-      padding: 5px;
-      cursor: move;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      user-select: none;
-      border-bottom: 1px solid #00ff00;
-    }
+.window-content {
+    flex: 1;
+    padding: 5px;
+    overflow-y: auto;
+    font-size: 14px;
+    line-height: 1.3em;
+}
 
-    .window-header .controls {
-      display: flex;
-      gap: 5px;
-    }
+/* ============================= */
+/* КНОПКИ */
+/* ============================= */
+.button {
+    display: inline-block;
+    padding: 5px 15px;
+    margin: 3px;
+    color: #00ff00;
+    border: 1px solid #00ff00;
+    cursor: pointer;
+    transition: all 0.2s;
+}
 
-    .close-btn, .max-btn {
-      background: #333;
-      border: none;
-      color: #00ff00;
-      cursor: pointer;
-      width: 25px;
-      height: 25px;
-      font-weight: bold;
-    }
-    .close-btn:hover { background: red; color: black; }
-    .max-btn:hover { background: #00aa00; color: black; }
+.button:hover {
+    background-color: #00ff00;
+    color: #0d0d0d;
+}
 
-    .window-content {
-      padding: 10px;
-      flex: 1;
-      background: black;
-      color: #00ff00;
-      overflow-y: auto;
-      font-size: 14px;
-    }
+/* ============================= */
+/* ЭФФЕКТЫ ТЕРМИНАЛА */
+/* ============================= */
+.terminal-line {
+    display: block;
+}
 
-    /* Matrix rain */
-    canvas#matrix {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: -1;
-    }
-  </style>
+.cursor {
+    display: inline-block;
+    width: 10px;
+    background-color: #00ff00;
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0%,50%,100% { opacity:1; }
+    25%,75% { opacity:0; }
+}
+
+/* ============================= */
+/* DRAGGING JS STYLE FIXES */
+/* ============================= */
+.ui-draggable-dragging { z-index: 9999 !important; }
+
+/* ============================= */
+/* ДОПОЛНИТЕЛЬНЫЕ ЭФФЕКТЫ */
+/* ============================= */
+.glitch {
+    position: relative;
+    color: #00ff00;
+    font-weight: bold;
+    animation: glitch 2s infinite;
+}
+
+@keyframes glitch {
+    0% { text-shadow: 2px 0 red, -2px 0 cyan; }
+    20% { text-shadow: -2px 0 red, 2px 0 cyan; }
+    40% { text-shadow: 2px 2px red, -2px -2px cyan; }
+    60% { text-shadow: -2px 2px red, 2px -2px cyan; }
+    80% { text-shadow: 2px -2px red, -2px 2px cyan; }
+    100% { text-shadow: 2px 0 red, -2px 0 cyan; }
+}
+
+/* ============================= */
+/* ФОРМА АВТОРИЗАЦИИ */
+/* ============================= */
+#loginWindow input {
+    width: calc(100% - 10px);
+    margin: 5px 0;
+    padding: 5px;
+    background-color: #0d0d0d;
+    border: 1px solid #00ff00;
+    color: #00ff00;
+}
+#loginWindow input::placeholder {
+    color: #00ff00;
+    opacity: 0.5;
+}
+
+/* ============================= */
+/* MATRIX BACKGROUND EFFECT */
+/* ============================= */
+#matrixCanvas {
+    position: absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    z-index:0;
+}
+</style>
 </head>
 <body>
-  <canvas id="matrix"></canvas>
-
-  <!-- Экран загрузки -->
-  <div id="loading">
-    <div id="console"></div>
-  </div>
-
-  <!-- Окно авторизации -->
-  <div id="loginWindow">
-    <h3>Авторизация</h3>
-    <p>Введите пароль:</p>
-    <input type="password" id="passwordInput" placeholder="Пароль">
-    <br>
-    <button onclick="checkPassword()">Войти</button>
-    <p id="error" style="color:red; display:none;">Неверный пароль</p>
-  </div>
-
-  <!-- Рабочий стол -->
-  <div id="desktop">
-    <div class="icon" onclick="openWindow('doc1')">
-      <img src="https://img.icons8.com/fluency/96/document.png" alt="doc">
-      <span>Документ 1</span>
-    </div>
-    <div class="icon" onclick="openWindow('doc2')">
-      <img src="https://img.icons8.com/fluency/96/document.png" alt="doc">
-      <span>Документ 2</span>
-    </div>
-    <div class="icon" onclick="openWindow('hack')">
-      <img src="https://img.icons8.com/fluency/96/command-line.png" alt="Hack">
-      <span>Консоль</span>
+<canvas id="matrixCanvas"></canvas>
+<div id="desktop">
+    <!-- ============================= -->
+    <!-- ОКНО АВТОРИЗАЦИИ -->
+    <!-- ============================= -->
+    <div class="window" id="loginWindow" style="top:50px; left:50px; z-index:5;">
+        <div class="window-header">
+            <span class="window-title">Authentication</span>
+            <div class="window-buttons">
+                <span class="close-btn" onclick="closeWindow('loginWindow')">X</span>
+            </div>
+        </div>
+        <div class="window-content">
+            <p class="flicker">Введите пароль для доступа:</p>
+            <input type="password" id="passwordInput" placeholder="Password">
+            <button class="button" onclick="checkPassword()">Войти</button>
+            <p id="loginMessage"></p>
+        </div>
     </div>
 
-    <div id="doc1" class="window">
-      <div class="window-header">Документ 1<div class="controls"><button class="max-btn" onclick="toggleMaximize('doc1')">[]</button><button class="close-btn" onclick="closeWindow('doc1')">X</button></div></div>
-      <div class="window-content"><a href="#" target="_blank">Текст документа 1</a></div>
+    <!-- ============================= -->
+    <!-- ТЕРМИНАЛ -->
+    <!-- ============================= -->
+    <div class="window" id="terminalWindow" style="top:100px; left:500px; z-index:4;">
+        <div class="window-header">
+            <span class="window-title">Terminal</span>
+            <div class="window-buttons">
+                <span class="close-btn" onclick="closeWindow('terminalWindow')">X</span>
+            </div>
+        </div>
+        <div class="window-content" id="terminalContent">
+            <span class="terminal-line">> Loading modules...</span>
+            <span class="terminal-line">> Initializing cyber matrix...</span>
+            <span class="terminal-line">> Welcome, hacker!</span>
+            <span class="terminal-line"><span class="cursor"></span></span>
+        </div>
     </div>
 
-    <div id="doc2" class="window">
-      <div class="window-header">Документ 2<div class="controls"><button class="max-btn" onclick="toggleMaximize('doc2')">[]</button><button class="close-btn" onclick="closeWindow('doc2')">X</button></div></div>
-      <div class="window-content">Текст документа 2</div>
+    <!-- ============================= -->
+    <!-- ПАНЕЛЬ КНОПОК -->
+    <!-- ============================= -->
+    <div class="window" id="controlPanel" style="top:400px; left:50px; width: 300px; height: 200px; z-index:3;">
+        <div class="window-header">
+            <span class="window-title">Control Panel</span>
+            <div class="window-buttons">
+                <span class="close-btn" onclick="closeWindow('controlPanel')">X</span>
+            </div>
+        </div>
+        <div class="window-content">
+            <button class="button" onclick="addTerminalLine('Scanning ports...')">Scan Ports</button>
+            <button class="button" onclick="addTerminalLine('Bypassing firewall...')">Bypass Firewall</button>
+            <button class="button" onclick="addTerminalLine('Accessing server...')">Access Server</button>
+            <button class="button" onclick="addTerminalLine('Deploying exploit...')">Deploy Exploit</button>
+        </div>
     </div>
 
-    <div id="hack" class="window">
-      <div class="window-header">Консоль<div class="controls"><button class="max-btn" onclick="toggleMaximize('hack')">[]</button><button class="close-btn" onclick="closeWindow('hack')">X</button></div></div>
-      <div class="window-content" id="hackContent">C:\> </div>
+    <!-- ============================= -->
+    <!-- ДОПОЛНИТЕЛЬНЫЕ ОКНА -->
+    <!-- ============================= -->
+    <div class="window" id="networkWindow" style="top:200px; left:900px; width:350px; height:250px; z-index:2;">
+        <div class="window-header">
+            <span class="window-title">Network Monitor</span>
+            <div class="window-buttons">
+                <span class="close-btn" onclick="closeWindow('networkWindow')">X</span>
+            </div>
+        </div>
+        <div class="window-content" id="networkContent">
+            <span class="terminal-line">> Scanning IPs...</span>
+            <span class="terminal-line">> Ping: 192.168.0.1 [OK]</span>
+            <span class="terminal-line">> Ping: 192.168.0.10 [OK]</span>
+        </div>
     </div>
-  </div>
 
-  <script>
-    // Matrix rain effect
-    const canvas = document.getElementById('matrix');
-    const ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()*&^%'.split('');
-    const fontSize = 16;
-    const columns = canvas.width / fontSize;
-    const drops = Array(Math.floor(columns)).fill(0);
-    function drawMatrix() {
-      ctx.fillStyle = 'rgba(0,0,0,0.05)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = '#00ff00';
-      ctx.font = fontSize + 'px monospace';
-      for (let i = 0; i < drops.length; i++) {
-        const text = letters[Math.floor(Math.random() * letters.length)];
+    <div class="window" id="logWindow" style="top:500px; left:500px; width:400px; height:200px; z-index:1;">
+        <div class="window-header">
+            <span class="window-title">System Log</span>
+            <div class="window-buttons">
+                <span class="close-btn" onclick="closeWindow('logWindow')">X</span>
+            </div>
+        </div>
+        <div class="window-content" id="logContent">
+            <span class="terminal-line">> SYSTEM STARTED</span>
+            <span class="terminal-line">> All modules active</span>
+        </div>
+    </div>
+</div>
+
+<script>
+/* ============================= */
+/* MATRIX BACKGROUND JS */
+/* ============================= */
+const canvas = document.getElementById('matrixCanvas');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()*&^%';
+const fontSize = 16;
+const columns = canvas.width / fontSize;
+const drops = [];
+for(let x = 0; x < columns; x++) drops[x] = 1;
+
+function drawMatrix() {
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#00ff00';
+    ctx.font = fontSize + 'px monospace';
+    for(let i = 0; i < drops.length; i++) {
+        const text = letters.charAt(Math.floor(Math.random() * letters.length));
         ctx.fillText(text, i*fontSize, drops[i]*fontSize);
-        drops[i] = drops[i]*fontSize > canvas.height && Math.random() > 0.975 ? 0 : drops[i]+1;
-      }
+        if(drops[i]*fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+        drops[i]++;
     }
-    setInterval(drawMatrix, 50);
+}
+setInterval(drawMatrix, 50);
 
-    // Loading screen typing effect
-    const messages = ["Connecting...","Authorizing...","Loading modules...","Access granted."];
-    let consoleDiv = document.getElementById("console"), idx=0;
-    function typeLine(){
-      if(idx<messages.length){
-        let line=messages[idx], i=0;
-        let interval=setInterval(()=>{
-          consoleDiv.textContent+=line[i];
-          i++; if(i>=line.length){clearInterval(interval);consoleDiv.textContent+="\n";idx++;setTimeout(typeLine,300);}
-        },30);
-      } else {setTimeout(()=>{document.getElementById("loading").style.display="none";document.getElementById("loginWindow").style.display="block";},500);}
-    }
-    typeLine();
+/* ============================= */
+/* ОКНА */
+/* ============================= */
+function closeWindow(id) { document.getElementById(id).style.display='none'; }
+function checkPassword() {
+    const pw = document.getElementById('passwordInput').value;
+    const msg = document.getElementById('loginMessage');
+    if(pw === 'yamaoki') { msg.textContent='Доступ разрешен!'; msg.style.color='#00ff00'; document.getElementById('loginWindow').style.display='none'; } 
+    else { msg.textContent='Неверный пароль!'; msg.style.color='red'; }
+}
 
-    // Password check
-    function checkPassword(){
-      const input=document.getElementById("passwordInput").value;
-      if(input==="yamaoki"){document.getElementById("loginWindow").style.display="none";document.getElementById("desktop").style.display="block";}
-      else{document.getElementById("error").style.display="block";}
-    }
+/* ============================= */
+/* TERMINAL SIMULATION */
+/* ============================= */
+function addTerminalLine(text) {
+    const terminal = document.getElementById('terminalContent');
+    const line = document.createElement('span');
+    line.className='terminal-line';
+    line.textContent='> '+text;
+    terminal.appendChild(line);
+    terminal.scrollTop=terminal.scrollHeight;
+}
 
-    // Windows management
-    function openWindow(id){document.getElementById(id).style.display="flex";}
-    function closeWindow(id){document.getElementById(id).style.display="none";}
-    const maximized = {};
-    function toggleMaximize(id){
-      const win=document.getElementById(id);
-      if(!maximized[id]){
-        win.dataset.prevLeft=win.style.left;win.dataset.prevTop=win.style.top;
-        win.dataset.prevWidth=win.style.width;win.dataset.prevHeight=win.style.height;
-        win.style.left='0px';win.style.top='0px';win.style.width='100%';win.style.height='100%';maximized[id]=true;
-      } else {
-        win.style.left=win.dataset.prevLeft;win.style.top=win.dataset.prevTop;
-        win.style.width=win.dataset.prevWidth;win.style.height=win.dataset.prevHeight;maximized[id]=false;
-      }
-    }
-
-    // Dragging windows
-    document.querySelectorAll('.window').forEach(win=>{
-      const header=win.querySelector('.window-header');
-      let offsetX=0,offsetY=0,isDown=false;
-      header.addEventListener('mousedown', e=>{if(e.target.classList.contains('close-btn')||e.target.classList.contains('max-btn')) return;isDown=true;offsetX=e.clientX-win.offsetLeft;offsetY=e.clientY-win.offsetTop;win.style.zIndex=1000;});
-      document.addEventListener('mouseup',()=>{isDown=false;});
-      document.addEventListener('mousemove',e=>{if(isDown&&!maximized[win.id]){win.style.left=(e.clientX-offsetX)+'px';win.style.top=(e.clientY-offsetY)+'px';}});
+/* ============================= */
+/* DRAG & DROP WINDOWS */
+/* ============================= */
+let dragItem=null, offsetX=0, offsetY=0;
+document.querySelectorAll('.window-header').forEach(header=>{
+    header.addEventListener('mousedown',e=>{
+        dragItem=header.parentElement;
+        offsetX=e.clientX-dragItem.offsetLeft;
+        offsetY=e.clientY-dragItem.offsetTop;
+        dragItem.style.zIndex=1000;
     });
-  </script>
+});
+document.addEventListener('mousemove',e=>{
+    if(dragItem){
+        dragItem.style.left=(e.clientX-offsetX)+'px';
+        dragItem.style.top=(e.clientY-offsetY)+'px';
+    }
+});
+document.addEventListener('mouseup',()=>{ if(dragItem) dragItem.style.zIndex=1; dragItem=null; });
+
+/* ============================= */
+/* BUTTON ACTIONS */
+document.querySelectorAll('#controlPanel .button').forEach(btn=>{
+    btn.addEventListener('click',()=>{ addTerminalLine('Command executed: '+btn.textContent); });
+});
+
+/* ============================= */
+/* ADDITIONAL EFFECTS */
+// Placeholder for future expansions: multiple terminals, popups, alert simulations
+</script>
 </body>
 </html>
+
+
 
 
