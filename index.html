@@ -31,6 +31,34 @@
       max-width: 600px;
     }
 
+    /* Окно авторизации */
+    #loginWindow {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #222;
+      border: 2px solid #555;
+      padding: 20px;
+      color: white;
+      text-align: center;
+      width: 300px;
+    }
+    #loginWindow input {
+      width: 90%;
+      padding: 8px;
+      margin: 10px 0;
+      border: none;
+      outline: none;
+    }
+    #loginWindow button {
+      padding: 5px 15px;
+      background: #00ff00;
+      border: none;
+      cursor: pointer;
+    }
+
     /* Рабочий стол */
     #desktop {
       display: none;
@@ -82,12 +110,22 @@
       user-select: none;
     }
 
-    .close-btn {
-      background: red;
+    .window-header .controls {
+      display: flex;
+      gap: 5px;
+    }
+
+    .close-btn, .max-btn {
+      background: #333;
       border: none;
       color: white;
       cursor: pointer;
+      width: 25px;
+      height: 25px;
     }
+
+    .close-btn:hover { background: red; }
+    .max-btn:hover { background: #00aa00; }
 
     .window-content {
       padding: 0;
@@ -105,6 +143,16 @@
   <!-- Экран загрузки -->
   <div id="loading">
     <div id="console"></div>
+  </div>
+
+  <!-- Окно авторизации -->
+  <div id="loginWindow">
+    <h3>Авторизация</h3>
+    <p>Введите пароль для входа:</p>
+    <input type="password" id="passwordInput" placeholder="Пароль">
+    <br>
+    <button onclick="checkPassword()">Войти</button>
+    <p id="error" style="color:red; display:none;">Неверный пароль</p>
   </div>
 
   <!-- Рабочий стол -->
@@ -127,7 +175,10 @@
     <div id="doc1" class="window">
       <div class="window-header">
         Документ 1
-        <button class="close-btn" onclick="closeWindow('doc1')">X</button>
+        <div class="controls">
+          <button class="max-btn" onclick="toggleMaximize('doc1')">[]</button>
+          <button class="close-btn" onclick="closeWindow('doc1')">X</button>
+        </div>
       </div>
       <div class="window-content">
         <a href="https://docs.google.com/document/d/1Y6DRS1MohZX0iOjmxPQ00dUmBa-VnthWRDAiNuDU78I/edit?tab=t.0" target="_blank">документ с реворком</a>
@@ -137,7 +188,10 @@
     <div id="doc2" class="window">
       <div class="window-header">
         Документ 2
-        <button class="close-btn" onclick="closeWindow('doc2')">X</button>
+        <div class="controls">
+          <button class="max-btn" onclick="toggleMaximize('doc2')">[]</button>
+          <button class="close-btn" onclick="closeWindow('doc2')">X</button>
+        </div>
       </div>
       <div class="window-content">
         Тут текст или содержимое документа №2.
@@ -148,7 +202,10 @@
     <div id="pinball" class="window">
       <div class="window-header">
         Pinball
-        <button class="close-btn" onclick="closeWindow('pinball')">X</button>
+        <div class="controls">
+          <button class="max-btn" onclick="toggleMaximize('pinball')">[]</button>
+          <button class="close-btn" onclick="closeWindow('pinball')">X</button>
+        </div>
       </div>
       <div class="window-content">
         <iframe src="https://funhtml5games.com?embed=pinball" allowfullscreen></iframe>
@@ -184,11 +241,22 @@
       } else {
         setTimeout(() => {
           document.getElementById("loading").style.display = "none";
-          document.getElementById("desktop").style.display = "block";
+          document.getElementById("loginWindow").style.display = "block";
         }, 1000);
       }
     }
     typeLine();
+
+    // Проверка пароля
+    function checkPassword() {
+      const input = document.getElementById("passwordInput").value;
+      if (input === "yamaoki") {
+        document.getElementById("loginWindow").style.display = "none";
+        document.getElementById("desktop").style.display = "block";
+      } else {
+        document.getElementById("error").style.display = "block";
+      }
+    }
 
     // Открытие/закрытие окон
     function openWindow(id) {
@@ -198,12 +266,36 @@
       document.getElementById(id).style.display = "none";
     }
 
+    // Максимизация окна
+    const maximized = {};
+    function toggleMaximize(id) {
+      const win = document.getElementById(id);
+      if (!maximized[id]) {
+        win.dataset.prevLeft = win.style.left;
+        win.dataset.prevTop = win.style.top;
+        win.dataset.prevWidth = win.style.width;
+        win.dataset.prevHeight = win.style.height;
+        win.style.left = "0px";
+        win.style.top = "0px";
+        win.style.width = "100%";
+        win.style.height = "100%";
+        maximized[id] = true;
+      } else {
+        win.style.left = win.dataset.prevLeft;
+        win.style.top = win.dataset.prevTop;
+        win.style.width = win.dataset.prevWidth;
+        win.style.height = win.dataset.prevHeight;
+        maximized[id] = false;
+      }
+    }
+
     // Перетаскивание окон
     document.querySelectorAll('.window').forEach(win => {
       const header = win.querySelector('.window-header');
       let offsetX = 0, offsetY = 0, isDown = false;
 
       header.addEventListener('mousedown', e => {
+        if (e.target.classList.contains("close-btn") || e.target.classList.contains("max-btn")) return;
         isDown = true;
         offsetX = e.clientX - win.offsetLeft;
         offsetY = e.clientY - win.offsetTop;
@@ -215,7 +307,7 @@
       });
 
       document.addEventListener('mousemove', e => {
-        if (isDown) {
+        if (isDown && !maximized[win.id]) {
           win.style.left = (e.clientX - offsetX) + 'px';
           win.style.top = (e.clientY - offsetY) + 'px';
         }
@@ -224,6 +316,7 @@
   </script>
 </body>
 </html>
+
 
 
 
