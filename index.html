@@ -94,10 +94,11 @@
       width: 600px;
       height: 500px;
       background: #222;
-      color: white;
+      color: #00ff00; /* зелёный текст как консоль */
       border: 2px solid #555;
       display: none;
       flex-direction: column;
+      font-family: monospace;
     }
 
     .window-header {
@@ -128,8 +129,12 @@
     .max-btn:hover { background: #00aa00; }
 
     .window-content {
-      padding: 0;
+      padding: 10px;
       flex: 1;
+      background: black;
+      color: #00ff00;
+      overflow-y: auto;
+      font-size: 14px;
     }
 
     .window-content iframe {
@@ -165,10 +170,14 @@
       <img src="https://img.icons8.com/fluency/96/document.png" alt="doc">
       <span>Документ 2</span>
     </div>
-    <!-- Новая иконка -->
     <div class="icon" onclick="openWindow('pinball')">
       <img src="https://img.icons8.com/color/96/ball.png" alt="Pinball">
       <span>Pinball</span>
+    </div>
+    <!-- NEW: иконка взлома -->
+    <div class="icon" onclick="openHack()">
+      <img src="https://img.icons8.com/fluency/96/command-line.png" alt="Hack">
+      <span>взлом жопы минамото</span>
     </div>
 
     <!-- Окна -->
@@ -198,7 +207,6 @@
       </div>
     </div>
 
-    <!-- Окно Pinball -->
     <div id="pinball" class="window">
       <div class="window-header">
         Pinball
@@ -210,6 +218,18 @@
       <div class="window-content">
         <iframe src="https://funhtml5games.com?embed=pinball" allowfullscreen></iframe>
       </div>
+    </div>
+
+    <!-- NEW: окно взлома -->
+    <div id="hack" class="window">
+      <div class="window-header">
+        Консоль
+        <div class="controls">
+          <button class="max-btn" onclick="toggleMaximize('hack')">[]</button>
+          <button class="close-btn" onclick="closeWindow('hack')">X</button>
+        </div>
+      </div>
+      <div class="window-content" id="hackContent"></div>
     </div>
   </div>
 
@@ -266,6 +286,29 @@
       document.getElementById(id).style.display = "none";
     }
 
+    // NEW: запуск консоли
+    function openHack() {
+      const win = document.getElementById("hack");
+      win.style.display = "flex";
+      const content = document.getElementById("hackContent");
+      content.textContent = "C:\\>dir /s\n\n";
+      let lines = [];
+      for (let i = 0; i < 200; i++) {
+        lines.push("Файл_" + i + ".dll");
+      }
+      let i = 0;
+      let interval = setInterval(() => {
+        if (i < lines.length) {
+          content.textContent += lines[i] + "\n";
+          content.scrollTop = content.scrollHeight;
+          i++;
+        } else {
+          clearInterval(interval);
+          content.textContent += "\nВзлом завершен.";
+        }
+      }, 20);
+    }
+
     // Максимизация окна
     const maximized = {};
     function toggleMaximize(id) {
@@ -299,7 +342,7 @@
         isDown = true;
         offsetX = e.clientX - win.offsetLeft;
         offsetY = e.clientY - win.offsetTop;
-        win.style.zIndex = 1000; // окно сверху
+        win.style.zIndex = 1000;
       });
 
       document.addEventListener('mouseup', () => {
@@ -316,12 +359,3 @@
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
