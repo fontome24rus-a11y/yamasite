@@ -1,680 +1,940 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Yamaoki — ULTRA Desktop</title>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --bg:#07060a;
-    --panel: rgba(255,255,255,0.06);
-    --glass: rgba(255,255,255,0.04);
-    --accent:#21ff4d;
-    --muted: rgba(255,255,255,0.6);
-    --win-shadow: 0 20px 60px rgba(2,6,23,0.75);
-    --radius: 12px;
-    --taskbar-height:56px;
-    --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-    --font-mono: "JetBrains Mono", monospace;
-  }
-
-  /* Light theme variables (switched with .light on body) */
-  body.light {
-    --bg: linear-gradient(180deg,#f7f8fb,#e9eef8);
-    --panel: rgba(0,0,0,0.05);
-    --glass: rgba(255,255,255,0.8);
-    --accent:#0066ff;
-    --muted: rgba(0,0,0,0.6);
-    --win-shadow: 0 12px 40px rgba(10,10,10,0.08);
-  }
-
-  *{box-sizing:border-box}
-  html,body{
-    height:100%;
-    margin:0;
-    font-family:var(--font-sans);
-    background: var(--bg);
-    -webkit-font-smoothing:antialiased;
-    -moz-osx-font-smoothing:grayscale;
-    overflow:hidden;
-    color: #e8f0e8;
-  }
-
-  /* full desktop area */
-  #desktopRoot {
-    position:relative;
-    width:100%;
-    height:100vh;
-    display:flex;
-    flex-direction:column;
-    user-select:none;
-  }
-
-  /* wallpaper + overlay */
-  #wallpaper{
-    position:absolute;
-    inset:0;
-    background-image: url('https://images.unsplash.com/photo-1549880338-65ddcdfd017b?q=80&w=1920&auto=format&fit=crop&ixlib=rb-4.0.3&s='); /* fallback */
-    background-size:cover;
-    background-position:center;
-    filter:brightness(0.45) saturate(1.1);
-    z-index:0;
-  }
-  body.light #wallpaper { filter: none; opacity:0.95; }
-
-  /* topbar area (can be empty) */
-  .desktop-area{
-    position:relative;
-    z-index:10;
-    flex:1;
-    display:flex;
-    padding:20px;
-    gap:12px;
-    align-items:flex-start;
-    overflow:auto;
-  }
-
-  /* icons grid */
-  .icons {
-    width:320px;
-    max-width:calc(100% - 40px);
-    display:grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap:14px;
-    padding:8px;
-    background: linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0.18));
-    border-radius:14px;
-    box-shadow: var(--win-shadow);
-    border:1px solid rgba(255,255,255,0.03);
-    backdrop-filter: blur(8px) saturate(1.1);
-  }
-  .icon {
-    padding:10px;
-    display:flex;
-    gap:8px;
-    align-items:center;
-    cursor:pointer;
-    border-radius:10px;
-    transition:transform .12s ease, background .12s ease;
-  }
-  .icon:hover{ transform: translateY(-6px); background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); }
-  .icon svg { width:44px; height:44px; flex-shrink:0; filter: drop-shadow(0 6px 18px rgba(0,0,0,0.6)); }
-  .icon .label { font-weight:600; font-size:14px; color:var(--muted) }
-
-  /* Taskbar */
-  #taskbar {
-    position:fixed;
-    left:0; right:0; bottom:0;
-    height:var(--taskbar-height);
-    display:flex;
-    align-items:center;
-    gap:12px;
-    padding:6px 12px;
-    z-index:9999;
-    background: linear-gradient(180deg, rgba(0,0,0,0.35), rgba(0,0,0,0.45));
-    border-top:1px solid rgba(255,255,255,0.03);
-    backdrop-filter: blur(8px);
-  }
-  #startBtn{
-    width:44px; height:44px; border-radius:10px; display:inline-grid; place-items:center;
-    background:var(--glass); cursor:pointer; border:1px solid rgba(255,255,255,0.03);
-  }
-  #taskIcons { display:flex; gap:8px; align-items:center; overflow:auto; padding-left:8px;}
-  .task-item {
-    min-width:44px; height:44px; display:inline-grid; place-items:center; border-radius:8px;
-    padding:6px; cursor:pointer; background:transparent; transition:transform .12s;
-    border:1px solid transparent;
-  }
-  .task-item.active{ background:linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01)); border-color: rgba(255,255,255,0.04) }
-  #taskClock { margin-left:auto; color:var(--muted); font-weight:600; padding-right:8px; min-width:120px; text-align:right; }
-
-  /* Start menu */
-  #startMenu {
-    position:fixed; left:12px; bottom:calc(var(--taskbar-height) + 12px);
-    width:360px; max-width:calc(100% - 24px);
-    background: linear-gradient(180deg, rgba(10,10,12,0.95), rgba(6,6,8,0.88));
-    border-radius:12px; padding:12px; box-shadow: var(--win-shadow); display:none; z-index:99999;
-    border:1px solid rgba(255,255,255,0.03); backdrop-filter: blur(6px);
-  }
-  #startMenu .search {
-    display:flex; gap:8px; align-items:center; padding:8px; border-radius:8px; background: rgba(255,255,255,0.02);
-  }
-  #startMenu .search input { background:transparent; border:none; outline:none; color:#fff; flex:1; font-size:14px; padding:6px; }
-  #startMenu .apps { margin-top:10px; display:grid; grid-template-columns: repeat(3,1fr); gap:8px; }
-
-  /* Windows (app windows) */
-  .window {
-    position:absolute;
-    width:700px; height:480px;
-    background: linear-gradient(180deg, rgba(12,12,12,0.98), rgba(10,10,11,0.98));
-    border-radius:12px;
-    border:1px solid rgba(255,255,255,0.04);
-    box-shadow: var(--win-shadow);
-    display:flex;
-    flex-direction:column;
-    overflow:hidden;
-    z-index:20;
-    resize: both;
-    min-width:320px; min-height:180px;
-    color:var(--accent);
-    font-family: var(--font-mono);
-  }
-
-  .win-header{
-    height:46px; display:flex; align-items:center; gap:12px; padding:0 12px;
-    background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-    cursor:grab;
-  }
-  .win-title { font-weight:700; color:var(--muted); font-family:var(--font-sans); }
-  .win-controls { margin-left:auto; display:flex; gap:8px; align-items:center; }
-  .win-controls button{ width:36px; height:32px; border-radius:8px; border:none; background:transparent; cursor:pointer; color:var(--muted) }
-  .win-body { padding:12px; flex:1; overflow:auto; background: linear-gradient(180deg, rgba(0,0,0,0.88), rgba(0,0,0,0.92)); color:var(--accent); font-size:13px; white-space:pre-wrap; }
-
-  .minimized { transform: translateY(6px) scale(0.98); opacity:0.9; }
-
-  /* console styling */
-  .terminal {
-    background: #000;
-    border-radius:8px;
-    padding:12px;
-    height:100%;
-    box-sizing:border-box;
-    color: var(--accent);
-    display:flex;
-    flex-direction:column;
-    gap:8px;
-  }
-  .term-output {
-    font-family: var(--font-mono);
-    font-size:13px;
-    overflow:auto;
-    white-space:pre;
-    background: linear-gradient(180deg, rgba(0,0,0,0.95), rgba(4,4,4,0.98));
-    padding:10px;
-    border-radius:6px;
-    flex:1;
-  }
-  .term-actions { display:flex; gap:8px; align-items:center; }
-  .btn { padding:8px 10px; border-radius:8px; border:none; cursor:pointer; background:rgba(255,255,255,0.03); color:var(--muted); font-weight:600; }
-
-  /* small screens */
-  @media (max-width:800px){
-    .window{ width:calc(100% - 28px); left:12px !important; top:60px !important; height:60vh; min-width:unset; }
-    .icons{ width:100%; grid-template-columns: repeat(3, 1fr); }
-    #taskClock{ display:none; }
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scarlet System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.waves.min.js"></script>
+    <style>
+        @keyframes flicker {
+            0%, 19.999%, 22%, 62.999%, 64%, 64.999%, 70%, 100% {
+                opacity: 1;
+            }
+            20%, 21.999%, 63%, 63.999%, 65%, 69.999% {
+                opacity: 0.4;
+            }
+        }
+        
+        @keyframes scanline {
+            0% {
+                transform: translateY(-100%);
+            }
+            100% {
+                transform: translateY(100vh);
+            }
+        }
+        
+        .boot-screen {
+            animation: flicker 8s linear infinite;
+        }
+        
+        .scanline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: rgba(255, 0, 0, 0.5);
+            z-index: 9999;
+            pointer-events: none;
+            animation: scanline 4s linear infinite;
+            mix-blend-mode: overlay;
+        }
+        
+        .window-shadow {
+            box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.8), 0 6px 30px rgba(255, 0, 0, 0.3);
+        }
+        
+        .taskbar {
+            backdrop-filter: blur(10px);
+            background: rgba(10, 0, 0, 0.8);
+        }
+        
+        .desktop-icon {
+            transition: all 0.2s ease;
+        }
+        
+        .desktop-icon:hover {
+            background: rgba(255, 0, 0, 0.2);
+        }
+        
+        .window {
+            transition: all 0.3s ease;
+            min-width: 300px;
+            min-height: 200px;
+        }
+        
+        .window-header {
+            user-select: none;
+            background: linear-gradient(to right, #1a0000, #400000);
+        }
+        
+        .window-content {
+            overscroll-behavior: contain;
+            background: rgba(10, 0, 0, 0.9);
+        }
+        
+        .login-screen {
+            background: linear-gradient(135deg, #1a0000, #400000, #800000);
+        }
+        
+        .login-form {
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.3);
+        }
+        
+        .btn {
+            transition: all 0.2s ease;
+            background: linear-gradient(to right, #800000, #400000);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .start-menu {
+            transition: all 0.3s ease;
+            transform-origin: bottom left;
+            background: rgba(20, 0, 0, 0.95);
+            border: 1px solid #400000;
+        }
+        
+        .pinball {
+            background: #000;
+            border: 4px solid #800000;
+            border-radius: 2px;
+        }
+        
+        .flipper {
+            background: #800000;
+            border: 2px solid #ff0000;
+        }
+        
+        .bumper {
+            background: radial-gradient(circle, #ff0000, #800000);
+            box-shadow: 0 0 10px #ff0000;
+        }
+        
+        .plunger {
+            background: linear-gradient(to bottom, #800000, #400000);
+            border: 2px solid #ff0000;
+        }
+        
+        .ball {
+            background: radial-gradient(circle, #fff, #ccc);
+            box-shadow: 0 0 5px #fff;
+        }
+        
+        .file-upload {
+            border: 2px dashed #800000;
+        }
+        
+        .file-upload:hover {
+            background: rgba(255, 0, 0, 0.1);
+        }
+    </style>
 </head>
-<body>
-<div id="desktopRoot" aria-label="Desktop">
-  <div id="wallpaper" role="img" aria-label="Wallpaper"></div>
-
-  <div class="desktop-area" id="desktopArea" aria-hidden="false">
-    <!-- Icons -->
-    <div class="icons" role="list" aria-label="Desktop icons">
-      <div class="icon" role="listitem" tabindex="0" data-app="doc1" aria-label="Документ 1">
-        <!-- doc svg -->
-        <svg viewBox="0 0 24 24" fill="none"><path d="M6 2h7l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" stroke="#fff" stroke-opacity="0.9" stroke-width="1.2" stroke-linejoin="round"/></svg>
-        <div class="label">Документ 1</div>
-      </div>
-
-      <div class="icon" role="listitem" tabindex="0" data-app="doc2" aria-label="Документ 2">
-        <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="3" width="16" height="18" rx="2" stroke="#fff" stroke-opacity="0.9" stroke-width="1.2"/></svg>
-        <div class="label">Документ 2</div>
-      </div>
-
-      <div class="icon" role="listitem" tabindex="0" data-app="pinball" aria-label="Pinball">
-        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="7" stroke="#fff" stroke-opacity="0.9" stroke-width="1.2"/></svg>
-        <div class="label">Pinball</div>
-      </div>
-
-      <!-- ULTRA: hack icon -->
-      <div class="icon" role="listitem" tabindex="0" id="hackIcon" aria-label="взлом жопы минамото">
-        <svg viewBox="0 0 24 24" fill="none">
-          <path d="M3 6h18v12H3z" stroke="#fff" stroke-width="1.2" stroke-linejoin="round"/>
-          <path d="M7 10l3 2-3 2" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M14 15h4" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <div class="label">взлом жопы минамото</div>
-      </div>
-
-      <div class="icon" role="listitem" tabindex="0" id="themeToggle" aria-label="Переключить тему">
-        <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v2M12 19v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4" stroke="#fff" stroke-opacity="0.9" stroke-width="1.1" stroke-linecap="round"/></svg>
-        <div class="label">Тема</div>
-      </div>
-    </div>
-
-    <!-- optional center area with welcome -->
-    <div style="flex:1; display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,0.9); text-align:center; padding:20px;">
-      <div>
-        <h1 style="margin:0 0 8px 0; font-family:var(--font-sans); font-weight:800;">Yamaoki — ULTRA Desktop</h1>
-        <div style="color:var(--muted); max-width:560px;">Панель управления, окна и фейковая консоль — улучшены: перетаскивание, ресайз, мультиконсоли и красивый UI.</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Start Menu -->
-  <div id="startMenu" role="menu" aria-hidden="true">
-    <div class="search">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M21 21l-4.35-4.35" stroke="#fff" stroke-opacity="0.7" stroke-width="1.4" stroke-linecap="round"/></svg>
-      <input id="startSearch" placeholder="Поиск..." aria-label="Поиск в меню"/>
-      <div style="width:8px"></div>
-      <button class="btn" id="quickLogout">Выйти</button>
-    </div>
-    <div class="apps" id="startApps" aria-hidden="false">
-      <div class="icon" data-app="doc1"><svg viewBox="0 0 24 24" fill="none"><path d="M6 2h7l5 5v13a2 2 0 0 1-2 2H6z" stroke="#fff" stroke-opacity="0.9" stroke-width="1.2" stroke-linejoin="round"/></svg><div class="label">Документ 1</div></div>
-      <div class="icon" data-app="hack"><svg viewBox="0 0 24 24" fill="none"><path d="M3 6h18v12H3z" stroke="#fff" stroke-width="1.2"/></svg><div class="label">Консоль</div></div>
-      <div class="icon" data-app="pinball"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="7" stroke="#fff" stroke-opacity="0.9" stroke-width="1.2"/></svg><div class="label">Pinball</div></div>
-    </div>
-  </div>
-
-  <!-- Taskbar -->
-  <div id="taskbar" role="toolbar" aria-label="Taskbar">
-    <div id="startBtn" title="Пуск" role="button" tabindex="0" aria-pressed="false">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="1" stroke="#fff" stroke-opacity="0.9" stroke-width="1.1"/><rect x="13" y="3" width="8" height="8" rx="1" stroke="#fff" stroke-opacity="0.9" stroke-width="1.1"/></svg>
-    </div>
-    <div id="taskIcons" aria-hidden="false"></div>
-    <div id="taskClock" aria-live="polite"></div>
-  </div>
-</div>
-
-<!-- Templates (hidden) -->
-<template id="windowTemplate">
-  <div class="window" role="dialog" aria-modal="false">
-    <div class="win-header" tabindex="0">
-      <div class="win-title">Приложение</div>
-      <div class="win-controls">
-        <button class="btn win-minimize" title="Свернуть">—</button>
-        <button class="btn win-maximize" title="Развернуть">□</button>
-        <button class="btn win-close" title="Закрыть">✕</button>
-      </div>
-    </div>
-    <div class="win-body">Содержимое</div>
-  </div>
-</template>
-
-<template id="consoleTemplate">
-  <div class="window terminal-window" role="dialog" aria-label="Консоль">
-    <div class="win-header" tabindex="0">
-      <div class="win-title">cmd.exe — C:\Users\Shindo</div>
-      <div class="win-controls">
-        <button class="btn term-stop" title="Остановить">■</button>
-        <button class="btn win-minimize" title="Свернуть">—</button>
-        <button class="btn win-maximize" title="Развернуть">□</button>
-        <button class="btn win-close" title="Закрыть">✕</button>
-      </div>
-    </div>
-    <div class="win-body">
-      <div style="display:flex;flex-direction:column;height:100%;">
-        <div class="term-output" aria-live="polite"></div>
-        <div style="display:flex;gap:8px;margin-top:8px">
-          <button class="btn term-restart">Перезапустить</button>
-          <button class="btn term-copy">Скопировать логи</button>
+<body class="bg-black text-red-400 font-mono overflow-hidden select-none">
+    <!-- Vanta.js Background -->
+    <div id="vanta-bg" class="fixed inset-0 z-0"></div>
+    
+    <!-- Boot Screen -->
+    <div id="boot-screen" class="fixed inset-0 bg-black z-50 flex flex-col items-center justify-center boot-screen">
+        <div class="text-center mb-8">
+            <div class="text-4xl mb-2 text-red-500">SCARLET SYSTEM</div>
+            <div class="text-xl">Initializing...</div>
         </div>
-      </div>
+        <div class="w-64 h-1 bg-gray-800 rounded-full overflow-hidden">
+            <div id="boot-progress" class="h-full bg-red-600" style="width: 0%"></div>
+        </div>
+        <div class="mt-4 text-sm text-gray-600">© 2023 SCARLET CORP</div>
     </div>
-  </div>
-</template>
-
-<script>
-/* ---------- Utilities ---------- */
-const qs = s => document.querySelector(s);
-const qsa = s => Array.from(document.querySelectorAll(s));
-let zIndexCounter = 50;
-
-/* ---------- Start menu & Taskbar ---------- */
-const startBtn = qs('#startBtn');
-const startMenu = qs('#startMenu');
-startBtn.addEventListener('click', toggleStart);
-startBtn.addEventListener('keydown', e=>{ if(e.key==='Enter') toggleStart(); });
-
-function toggleStart(){
-  const shown = startMenu.style.display === 'block';
-  startMenu.style.display = shown ? 'none' : 'block';
-  startBtn.setAttribute('aria-pressed', String(!shown));
-  if(!shown) qs('#startSearch').focus();
-}
-
-/* hide start when clicking outside */
-document.addEventListener('click', (e)=>{
-  if (!startMenu.contains(e.target) && !startBtn.contains(e.target)) startMenu.style.display = 'none';
-});
-
-/* clock */
-function updateClock(){
-  // show local time (browser time). If you want Paris time regardless, you can use toLocaleString with 'Europe/Paris'.
-  const now = new Date();
-  const opts = { hour:'2-digit', minute:'2-digit', second:'2-digit' };
-  qs('#taskClock').textContent = now.toLocaleTimeString([], opts);
-}
-setInterval(updateClock, 1000);
-updateClock();
-
-/* ---------- Theme toggle ---------- */
-qs('#themeToggle').addEventListener('click', ()=>{
-  document.body.classList.toggle('light');
-});
-
-/* ---------- Desktop icon activation (open app windows) ---------- */
-function createWindow({title='App', content='...', width=700, height=480, x=80, y=60, isTerminal=false}){
-  const tpl = isTerminal ? qs('#consoleTemplate') : qs('#windowTemplate');
-  const node = tpl.content.firstElementChild.cloneNode(true);
-  // set initial pos & size
-  node.style.left = (x + Math.random()*40)+'px';
-  node.style.top = (y + Math.random()*40)+'px';
-  node.style.width = width+'px';
-  node.style.height = height+'px';
-  node.style.zIndex = ++zIndexCounter;
-
-  node.querySelector('.win-title').textContent = title;
-  const body = node.querySelector('.win-body');
-
-  // if terminal, body already has term-output etc
-  if(isTerminal){
-    // nothing extra for now
-  } else {
-    if (content instanceof HTMLElement) body.appendChild(content);
-    else body.textContent = content;
-  }
-
-  document.body.appendChild(node);
-  makeWindowInteractive(node);
-  addToTaskbar(node, title, isTerminal);
-  return node;
-}
-
-function makeWindowInteractive(win){
-  // bring to front on mousedown
-  win.addEventListener('mousedown', ()=>{ win.style.zIndex = ++zIndexCounter; });
-
-  const header = win.querySelector('.win-header');
-  let dragging = false, offsetX=0, offsetY=0;
-
-  header.addEventListener('mousedown', (e)=>{
-    if (e.target.closest('button')) return; // don't drag when clicking controls
-    dragging = true;
-    win.style.zIndex = ++zIndexCounter;
-    offsetX = e.clientX - win.offsetLeft;
-    offsetY = e.clientY - win.offsetTop;
-    header.style.cursor = 'grabbing';
-  });
-  document.addEventListener('mousemove', (e)=>{
-    if(!dragging) return;
-    win.style.left = (e.clientX - offsetX)+'px';
-    win.style.top = (e.clientY - offsetY)+'px';
-  });
-  document.addEventListener('mouseup', ()=>{ dragging = false; header.style.cursor='grab'; });
-
-  // close/minimize/maximize
-  const btnClose = win.querySelector('.win-close');
-  const btnMin = win.querySelectorAll('.win-minimize');
-  const btnMax = win.querySelectorAll('.win-maximize');
-
-  btnClose && btnClose.addEventListener('click', ()=>{ removeWindow(win); });
-
-  btnMin && btnMin.forEach(b=>{
-    b.addEventListener('click', ()=>{ minimizeWindow(win); });
-  });
-
-  btnMax && btnMax.forEach(b=>{
-    b.addEventListener('click', ()=>{ toggleMaximize(win); });
-  });
-
-  // focus styles & keyboard
-  header.addEventListener('keydown', (e)=>{
-    if(e.key === 'Escape') removeWindow(win);
-    if(e.key === ' ' || e.key === 'Enter') win.style.zIndex = ++zIndexCounter;
-  });
-
-  // accessibility: bring to front on focus
-  win.setAttribute('tabindex','-1');
-}
-
-/* ---------- Taskbar items ---------- */
-function addToTaskbar(win, title, isTerminal=false){
-  const id = 'task-'+(Math.random().toString(36).slice(2,8));
-  win.dataset.taskId = id;
-  const item = document.createElement('div');
-  item.className = 'task-item';
-  item.title = title;
-  item.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect width="18" height="18" rx="4" y="3" x="3" stroke="#fff" stroke-opacity="0.9" stroke-width="1"/></svg>`;
-  qs('#taskIcons').appendChild(item);
-
-  // click toggles minimize/restore
-  item.addEventListener('click', ()=>{
-    if (win.style.display === 'none' || win.classList.contains('minimized')) {
-      restoreWindow(win);
-    } else {
-      minimizeWindow(win);
-    }
-  });
-
-  // keep only for open windows; remove on close is handled by removeWindow
-  item.dataset.taskId = id;
-  win._taskItem = item;
-  setTimeout(()=>{ item.classList.add('active') }, 50);
-}
-
-function removeTaskbarItem(win){
-  if(win && win._taskItem) {
-    win._taskItem.remove();
-  }
-}
-
-/* ---------- Window controls ---------- */
-function removeWindow(win){
-  removeTaskbarItem(win);
-  try { win.remove(); } catch(e){ /*ignore*/ }
-}
-function minimizeWindow(win){
-  win.style.display = 'none';
-  if(win._taskItem) win._taskItem.classList.remove('active');
-}
-function restoreWindow(win){
-  win.style.display = 'flex';
-  win.style.zIndex = ++zIndexCounter;
-  if(win._taskItem) win._taskItem.classList.add('active');
-}
-function toggleMaximize(win){
-  if(win.dataset.max === 'true'){
-    // restore
-    win.style.left = win.dataset.prevLeft;
-    win.style.top = win.dataset.prevTop;
-    win.style.width = win.dataset.prevWidth;
-    win.style.height = win.dataset.prevHeight;
-    win.dataset.max = 'false';
-  } else {
-    // store
-    win.dataset.prevLeft = win.style.left;
-    win.dataset.prevTop = win.style.top;
-    win.dataset.prevWidth = win.style.width;
-    win.dataset.prevHeight = win.style.height;
-    win.style.left = '0px';
-    win.style.top = '0px';
-    win.style.width = '100%';
-    win.style.height = 'calc(100vh - var(--taskbar-height))';
-    win.dataset.max = 'true';
-    win.style.zIndex = ++zIndexCounter;
-  }
-}
-
-/* ---------- Desktop icon clicks (open apps) ---------- */
-qsa('.icon[data-app]').forEach(el=>{
-  el.addEventListener('dblclick', ()=>{ launchFromIcon(el.dataset.app); });
-  el.addEventListener('keydown', (e)=>{ if(e.key==='Enter') launchFromIcon(el.dataset.app); });
-});
-qsa('#startApps .icon').forEach(el=>{
-  el.addEventListener('click', ()=>{ launchFromIcon(el.dataset.app); });
-});
-
-function launchFromIcon(appId){
-  if(appId === 'doc1') {
-    const content = document.createElement('div');
-    content.innerHTML = 'Документ 1 — ссылка: <a href="https://docs.google.com/document/d/1Y6DRS1MohZX0iOjmxPQ00dUmBa-VnthWRDAiNuDU78I/edit" target="_blank" style="color:var(--muted)">Открыть в Google Docs</a>';
-    createWindow({title:'Документ 1', content});
-  } else if(appId === 'doc2'){
-    const content = document.createElement('div');
-    content.innerHTML = '<h3>Документ 2</h3><p>Здесь можно разместить какой-то текст.</p>';
-    createWindow({title:'Документ 2', content});
-  } else if(appId === 'pinball'){
-    const iframe = document.createElement('iframe');
-    iframe.src = 'https://funhtml5games.com?embed=pinball';
-    iframe.style.width = '100%'; iframe.style.height = '100%'; iframe.style.border='none';
-    const wnd = createWindow({title:'Pinball', content:iframe});
-    // replace content
-    const body = wnd.querySelector('.win-body');
-    body.innerHTML = ''; body.appendChild(iframe);
-  } else if(appId === 'hack' || appId === 'взлом жопы минамото' || appId === 'hackIcon') {
-    openConsoleInstance();
-  }
-}
-
-/* ---------- Multiple console instances ---------- */
-let consoleCount = 0;
-function openConsoleInstance(){
-  consoleCount++;
-  const wnd = createWindow({title:`Консоль — instance #${consoleCount}`, isTerminal:true, width:820, height:420});
-  // place terminal content
-  const termOutput = wnd.querySelector('.term-output');
-  const stopBtn = wnd.querySelector('.term-stop');
-  const restartBtn = wnd.querySelector('.term-restart');
-  const copyBtn = wnd.querySelector('.term-copy');
-
-  // populate with simulated dir /s output
-  let running = true;
-  let lineIndex = 0;
-  const simulated = generateFakeFileList(500); // many lines
-
-  function step(){
-    if(!running) return;
-    if(lineIndex < simulated.length){
-      termOutput.textContent += simulated[lineIndex] + "\n";
-      termOutput.scrollTop = termOutput.scrollHeight;
-      lineIndex++;
-      // schedule next
-      const delay = 6 + Math.random()*30; // variable speed
-      wnd._termTimer = setTimeout(step, delay);
-    } else {
-      termOutput.textContent += "\nВзлом завершен.\n";
-      termOutput.scrollTop = termOutput.scrollHeight;
-    }
-  }
-  // start
-  termOutput.textContent = "C:\\>dir /s\n\n";
-  step();
-
-  stopBtn.addEventListener('click', ()=>{
-    running = false;
-    clearTimeout(wnd._termTimer);
-    termOutput.textContent += "\n[Процесс остановлен пользователем]\n";
-  });
-  restartBtn.addEventListener('click', ()=>{
-    running = true;
-    lineIndex = 0;
-    termOutput.textContent = "C:\\>dir /s\n\n";
-    clearTimeout(wnd._termTimer);
-    step();
-  });
-  copyBtn.addEventListener('click', ()=>{
-    navigator.clipboard.writeText(termOutput.textContent).then(()=> alert('Логи скопированы в буфер обмена.'));
-  });
-}
-
-/* tiny fake file list generator */
-function generateFakeFileList(n){
-  const names = ['system','win32','kernel','user','config','lib','data','cache','tmp','plugin','Файл','Документ','module','drv'];
-  const exts = ['.dll','.exe','.dat','.sys','.txt','.log','.cfg','.bin','.so','.json'];
-  const out=[];
-  for(let i=0;i<n;i++){
-    const part = names[Math.floor(Math.random()*names.length)];
-    const ext = exts[Math.floor(Math.random()*exts.length)];
-    const folderDepth = Math.floor(Math.random()*5)+1;
-    let path = 'C:\\Users\\Shindo';
-    for(let d=0;d<folderDepth;d++){
-      path += '\\' + (Math.random()<0.2 ? 'Library' : 'Folder'+(Math.floor(Math.random()*200)));
-    }
-    out.push(path + '\\' + part + '_' + i + ext);
-  }
-  return out;
-}
-
-/* ---------- remove window on Escape globally if focused element is inside a window header */ 
-document.addEventListener('keydown', (e)=>{
-  if(e.key === 'Escape'){
-    // try close topmost focused window
-    const wins = Array.from(document.querySelectorAll('.window')).sort((a,b)=>b.style.zIndex - a.style.zIndex);
-    if(wins.length) {
-      const top = wins[0];
-      removeWindow(top);
-    }
-  }
-});
-
-/* ---------- initial quick demo: pre-open console once (optional) ---------- */
-setTimeout(()=>{ /* nothing by default */ }, 800);
-
-/* ---------- login (keeps original behaviour) ---------- */
-(function addLoginFlow(){
-  // create a small modal simulating original flow
-  const loading = document.createElement('div');
-  loading.id = 'loadingModal';
-  loading.style.position='fixed'; loading.style.left=0; loading.style.top=0; loading.style.right=0; loading.style.bottom=0;
-  loading.style.display='flex'; loading.style.alignItems='center'; loading.style.justifyContent='center';
-  loading.style.background='linear-gradient(180deg, rgba(0,0,0,0.8), rgba(0,0,0,0.6))';
-  loading.style.zIndex=999999;
-  loading.innerHTML = `<div style="color:var(--muted);font-family:var(--font-mono); text-align:center; padding:30px; border-radius:12px; background:rgba(0,0,0,0.6); border:1px solid rgba(255,255,255,0.03);">
-    <div id="loadingConsole" style="white-space:pre; text-align:left; max-width:440px; font-size:13px; color:var(--muted)"></div>
-    <div style="margin-top:12px; display:flex; gap:8px; justify-content:center;">
-      <input id="pwInput" placeholder="Введите пароль" style="padding:8px;border-radius:8px;border:none;outline:none;background:rgba(255,255,255,0.02); color:#fff"/>
-      <button id="pwBtn" class="btn">Войти</button>
+    
+    <!-- Login Screen -->
+    <div id="login-screen" class="fixed inset-0 z-40 hidden login-screen flex items-center justify-center">
+        <div class="login-form bg-black bg-opacity-90 rounded-lg p-8 w-96 border border-red-900">
+            <div class="text-center mb-8">
+                <div class="text-3xl mb-2 text-red-500">SCARLET SYSTEM</div>
+                <div class="text-sm text-red-400">Authentication Required</div>
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-sm mb-2">Username</label>
+                <input type="text" class="w-full bg-black border border-red-900 rounded px-3 py-2 focus:outline-none focus:border-red-500 text-white" value="user">
+            </div>
+            
+            <div class="mb-6">
+                <label class="block text-sm mb-2">Password</label>
+                <input type="password" class="w-full bg-black border border-red-900 rounded px-3 py-2 focus:outline-none focus:border-red-500 text-white" value="password">
+            </div>
+            
+            <button id="login-btn" class="w-full text-white py-2 rounded btn hover:bg-red-800">
+                Login
+            </button>
+        </div>
     </div>
-    <div id="pwError" style="color:#ff6b6b; margin-top:8px; display:none;">Неверный пароль</div>
-  </div>`;
-  document.body.appendChild(loading);
-
-  // type-like intro
-  const lines = ["Initializing Yamaoki UI...", "Loading modules...", "Authenticating user...", "Ready."];
-  const out = qs('#loadingConsole');
-  let li = 0;
-  function typeLine(){
-    if(li >= lines.length) return;
-    const text = lines[li];
-    let i=0;
-    const int = setInterval(()=>{
-      out.textContent += text[i]; i++;
-      if(i>=text.length){ clearInterval(int); out.textContent += '\n'; li++; setTimeout(typeLine, 450); }
-    }, 28);
-  }
-  typeLine();
-
-  // password check (original password "yamaoki")
-  function attemptLogin(){
-    const pw = qs('#pwInput').value;
-    if(pw === 'yamaoki'){
-      loading.remove();
-      // small welcome toast
-      const t = document.createElement('div'); t.textContent='Добро пожаловать, Shindo'; t.style.position='fixed'; t.style.right='20px'; t.style.bottom='80px'; t.style.padding='10px 14px'; t.style.borderRadius='10px'; t.style.background='rgba(0,0,0,0.6)'; t.style.border='1px solid rgba(255,255,255,0.03)'; t.style.zIndex=999999; document.body.appendChild(t);
-      setTimeout(()=>t.remove(), 2200);
-    } else {
-      qs('#pwError').style.display = 'block';
-      setTimeout(()=>{ qs('#pwError').style.display='none'; }, 2000);
-    }
-  }
-  qs('#pwBtn').addEventListener('click', attemptLogin);
-  qs('#pwInput').addEventListener('keydown', (e)=>{ if(e.key==='Enter') attemptLogin(); });
-})();
-
-/* ---------- Hack icon click binding ---------- */
-qs('#hackIcon').addEventListener('dblclick', ()=>{ openConsoleInstance(); });
-qs('#hackIcon').addEventListener('click', ()=>{ /* single click: small bounce */ qs('#hackIcon').style.transform='translateY(-4px)'; setTimeout(()=>qs('#hackIcon').style.transform='',120); });
-
-/* ---------- Accessibility: focus outline for keyboard nav ---------- */
-document.addEventListener('keydown', (e)=>{
-  if(e.key === 'Tab') document.body.classList.add('using-keyboard');
-});
-</script>
+    
+    <!-- Desktop -->
+    <div id="desktop" class="fixed inset-0 hidden z-30">
+        <!-- Desktop Icons -->
+        <div class="absolute left-4 top-4 flex flex-col space-y-4">
+            <div class="desktop-icon flex flex-col items-center w-16 p-2 rounded cursor-pointer" data-window="wallpaper">
+                <div class="w-12 h-12 bg-red-900 rounded flex items-center justify-center mb-1">
+                    <i data-feather="image" class="text-red-400"></i>
+                </div>
+                <span class="text-xs text-center text-white">Wallpaper</span>
+            </div>
+            
+            <div class="desktop-icon flex flex-col items-center w-16 p-2 rounded cursor-pointer" data-window="pinball">
+                <div class="w-12 h-12 bg-red-900 rounded flex items-center justify-center mb-1">
+                    <i data-feather="cpu" class="text-red-400"></i>
+                </div>
+                <span class="text-xs text-center text-white">Pinball</span>
+            </div>
+            
+            <div class="desktop-icon flex flex-col items-center w-16 p-2 rounded cursor-pointer" data-window="settings">
+                <div class="w-12 h-12 bg-red-900 rounded flex items-center justify-center mb-1">
+                    <i data-feather="settings" class="text-red-400"></i>
+                </div>
+                <span class="text-xs text-center text-white">Settings</span>
+            </div>
+        </div>
+        
+        <!-- Windows -->
+        <div id="windows-container" class="absolute inset-0 pointer-events-none">
+            <!-- Windows will be dynamically added here -->
+        </div>
+        
+        <!-- Taskbar -->
+        <div class="absolute bottom-0 left-0 right-0 h-10 taskbar flex items-center px-2 border-t border-red-900 z-40">
+            <button id="start-btn" class="h-8 px-3 flex items-center rounded hover:bg-red-900 mr-2">
+                <i data-feather="power" class="w-4 h-4 mr-2 text-red-400"></i>
+                <span class="text-white">Start</span>
+            </button>
+            
+            <div id="taskbar-items" class="flex-1 flex items-center space-x-1 overflow-x-auto">
+                <!-- Taskbar items will be added here -->
+            </div>
+            
+            <div class="text-xs px-2 py-1 bg-black rounded border border-red-900">
+                <span id="clock" class="text-red-400">00:00</span>
+            </div>
+        </div>
+        
+        <!-- Start Menu -->
+        <div id="start-menu" class="absolute bottom-10 left-0 w-64 rounded-tr-lg rounded-b-lg border border-red-900 window-shadow hidden start-menu origin-bottom-left z-50">
+            <div class="p-2 border-b border-red-900 window-header flex justify-between items-center">
+                <div class="font-medium text-red-400">Start Menu</div>
+                <button class="p-1 hover:bg-red-900 rounded">
+                    <i data-feather="x" class="w-4 h-4 text-red-400"></i>
+                </button>
+            </div>
+            
+            <div class="p-2 window-content">
+                <div class="mb-4">
+                    <div class="text-xs text-red-600 uppercase mb-1">Applications</div>
+                    <div class="space-y-1">
+                        <a href="#" class="block px-2 py-1 hover:bg-red-900 rounded flex items-center text-white" data-window="wallpaper">
+                            <i data-feather="image" class="w-4 h-4 mr-2 text-red-400"></i>
+                            <span>Wallpaper</span>
+                        </a>
+                        <a href="#" class="block px-2 py-1 hover:bg-red-900 rounded flex items-center text-white" data-window="pinball">
+                            <i data-feather="cpu" class="w-4 h-4 mr-2 text-red-400"></i>
+                            <span>Pinball</span>
+                        </a>
+                        <a href="#" class="block px-2 py-1 hover:bg-red-900 rounded flex items-center text-white" data-window="settings">
+                            <i data-feather="settings" class="w-4 h-4 mr-2 text-red-400"></i>
+                            <span>Settings</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="border-t border-red-900 pt-2">
+                    <a href="#" class="block px-2 py-1 hover:bg-red-900 rounded flex items-center text-white" id="shutdown-btn">
+                        <i data-feather="power" class="w-4 h-4 mr-2 text-red-400"></i>
+                        <span>Shutdown</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Window Templates -->
+    <template id="window-template">
+        <div class="window absolute rounded-lg border border-red-900 window-shadow flex flex-col pointer-events-auto" style="width: 600px; height: 400px;">
+            <div class="p-2 border-b border-red-900 window-header flex justify-between items-center cursor-move">
+                <div class="font-medium flex items-center text-white">
+                    <i class="window-icon w-4 h-4 mr-2 text-red-400"></i>
+                    <span class="window-title">Window</span>
+                </div>
+                <div class="flex space-x-1">
+                    <button class="window-minimize p-1 hover:bg-red-900 rounded">
+                        <i data-feather="minus" class="w-4 h-4 text-red-400"></i>
+                    </button>
+                    <button class="window-maximize p-1 hover:bg-red-900 rounded">
+                        <i data-feather="maximize-2" class="w-4 h-4 text-red-400"></i>
+                    </button>
+                    <button class="window-close p-1 hover:bg-red-700 rounded">
+                        <i data-feather="x" class="w-4 h-4 text-white"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="flex-1 overflow-auto window-content p-4 text-white">
+                <!-- Content will be added here -->
+            </div>
+            <div class="h-4 border-t border-red-900 flex items-center px-2 text-xs text-red-400">
+                <span class="window-status">Ready</span>
+            </div>
+        </div>
+    </template>
+    
+    <!-- Wallpaper Content -->
+    <template id="wallpaper-content">
+        <div>
+            <h2 class="text-xl mb-4 text-red-400">Wallpaper Settings</h2>
+            <div class="mb-6">
+                <div class="file-upload rounded-lg p-8 text-center cursor-pointer mb-4" id="wallpaper-upload">
+                    <i data-feather="upload" class="w-8 h-8 mx-auto mb-2 text-red-400"></i>
+                    <p class="text-red-400">Click to upload wallpaper</p>
+                    <p class="text-xs text-gray-500 mt-1">Supported formats: JPG, PNG</p>
+                    <input type="file" id="wallpaper-input" accept="image/*" class="hidden">
+                </div>
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="bg-black border border-red-900 rounded p-2 cursor-pointer" data-wallpaper="1">
+                        <img src="http://static.photos/red/300x200/1" class="w-full h-24 object-cover rounded">
+                    </div>
+                    <div class="bg-black border border-red-900 rounded p-2 cursor-pointer" data-wallpaper="2">
+                        <img src="http://static.photos/red/300x200/2" class="w-full h-24 object-cover rounded">
+                    </div>
+                    <div class="bg-black border border-red-900 rounded p-2 cursor-pointer" data-wallpaper="3">
+                        <img src="http://static.photos/red/300x200/3" class="w-full h-24 object-cover rounded">
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-red-900 pt-4">
+                <h3 class="text-lg mb-2 text-red-400">Live Wallpaper</h3>
+                <div class="grid grid-cols-2 gap-4">
+                    <button class="bg-black border border-red-900 rounded p-3 text-left hover:bg-red-900" data-effect="waves">
+                        <i data-feather="wind" class="w-6 h-6 mb-2 text-red-400"></i>
+                        <div class="text-white">Blood Waves</div>
+                    </button>
+                    <button class="bg-black border border-red-900 rounded p-3 text-left hover:bg-red-900" data-effect="cells">
+                        <i data-feather="activity" class="w-6 h-6 mb-2 text-red-400"></i>
+                        <div class="text-white">Pulse Cells</div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </template>
+    
+    <!-- Pinball Content -->
+    <template id="pinball-content">
+        <div class="h-full flex flex-col">
+            <h2 class="text-xl mb-4 text-red-400">Scarlet Pinball</h2>
+            <div class="flex-1 flex items-center justify-center">
+                <canvas id="pinball-canvas" width="500" height="700" class="pinball"></canvas>
+            </div>
+            <div class="flex justify-between items-center mt-4">
+                <div class="text-white">
+                    Score: <span id="pinball-score">0</span>
+                </div>
+                <button id="pinball-start" class="bg-red-900 hover:bg-red-800 text-white px-4 py-1 rounded">
+                    Start Game
+                </button>
+            </div>
+        </div>
+    </template>
+    
+    <!-- Settings Content -->
+    <template id="settings-content">
+        <div>
+            <h2 class="text-xl mb-4 text-red-400">System Settings</h2>
+            <div class="space-y-6">
+                <div>
+                    <h3 class="text-lg mb-2 text-red-400">Appearance</h3>
+                    <div class="bg-black border border-red-900 rounded p-4">
+                        <div class="mb-4">
+                            <label class="block text-sm mb-2 text-white">Theme Color</label>
+                            <div class="flex space-x-2">
+                                <button class="w-8 h-8 rounded-full bg-red-900 border-2 border-red-600"></button>
+                                <button class="w-8 h-8 rounded-full bg-black border-2 border-gray-600"></button>
+                                <button class="w-8 h-8 rounded-full bg-gray-900 border-2 border-gray-400"></button>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-2 text-white">Window Style</label>
+                            <select class="w-full bg-black border border-red-900 rounded px-3 py-2 text-white">
+                                <option>Classic</option>
+                                <option>Modern</option>
+                                <option>Minimal</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg mb-2 text-red-400">System</h3>
+                    <div class="bg-black border border-red-900 rounded p-4">
+                        <div class="mb-4">
+                            <label class="block text-sm mb-2 text-white">Performance Mode</label>
+                            <div class="flex items-center">
+                                <input type="checkbox" id="performance-mode" class="mr-2">
+                                <label for="performance-mode" class="text-sm text-white">Enable high performance mode</label>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-2 text-white">System Information</label>
+                            <div class="text-xs text-gray-400">
+                                <div>OS: Scarlet System v1.0</div>
+                                <div>Memory: 8GB</div>
+                                <div>Processor: Quantum X-9000</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+    
+    <!-- Scanline Effect -->
+    <div class="scanline"></div>
+    
+    <script>
+        // Initialize feather icons
+        feather.replace();
+        
+        // Vanta.js background
+        let vantaEffect;
+        function initVanta(effect = 'waves') {
+            if (vantaEffect) vantaEffect.destroy();
+            
+            if (effect === 'waves') {
+                vantaEffect = VANTA.WAVES({
+                    el: "#vanta-bg",
+                    mouseControls: true,
+                    touchControls: true,
+                    gyroControls: false,
+                    minHeight: 200.00,
+                    minWidth: 200.00,
+                    scale: 1.00,
+                    scaleMobile: 1.00,
+                    color: 0x800000,
+                    shininess: 35.00,
+                    waveHeight: 15.00,
+                    waveSpeed: 0.85,
+                    zoom: 0.75
+                });
+            } else if (effect === 'cells') {
+                vantaEffect = VANTA.CELLS({
+                    el: "#vanta-bg",
+                    mouseControls: true,
+                    touchControls: true,
+                    gyroControls: false,
+                    minHeight: 200.00,
+                    minWidth: 200.00,
+                    scale: 1.00,
+                    color1: 0x800000,
+                    color2: 0x0,
+                    size: 1.20,
+                    speed: 1.10
+                });
+            }
+        }
+        
+        // Boot sequence
+        let bootProgress = 0;
+        const bootInterval = setInterval(() => {
+            bootProgress += Math.random() * 10;
+            if (bootProgress > 100) bootProgress = 100;
+            document.getElementById('boot-progress').style.width = `${bootProgress}%`;
+            
+            if (bootProgress >= 100) {
+                clearInterval(bootInterval);
+                setTimeout(() => {
+                    document.getElementById('boot-screen').classList.add('hidden');
+                    document.getElementById('login-screen').classList.remove('hidden');
+                }, 500);
+            }
+        }, 300);
+        
+        // Login
+        document.getElementById('login-btn').addEventListener('click', () => {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('desktop').classList.remove('hidden');
+            updateClock();
+            setInterval(updateClock, 1000);
+            initVanta('waves');
+        });
+        
+        // Clock
+        function updateClock() {
+            const now = new Date();
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            document.getElementById('clock').textContent = `${hours}:${minutes}`;
+        }
+        
+        // Window management
+        let zIndex = 10;
+        let activeWindow = null;
+        const windows = {};
+        let isDragging = false;
+        let dragOffsetX = 0;
+        let dragOffsetY = 0;
+        
+        function createWindow(type) {
+            const template = document.getElementById('window-template').content.cloneNode(true);
+            const windowEl = template.querySelector('.window');
+            const contentTemplate = document.getElementById(`${type}-content`).content.cloneNode(true);
+            
+            // Set window properties
+            windowEl.querySelector('.window-content').appendChild(contentTemplate);
+            windowEl.style.zIndex = zIndex++;
+            windowEl.style.left = `${Math.random() * 200}px`;
+            windowEl.style.top = `${Math.random() * 100}px`;
+            
+            // Set window title and icon
+            const titles = {
+                'wallpaper': { title: 'Wallpaper', icon: 'image' },
+                'pinball': { title: 'Pinball', icon: 'cpu' },
+                'settings': { title: 'Settings', icon: 'settings' }
+            };
+            
+            windowEl.querySelector('.window-title').textContent = titles[type].title;
+            const iconEl = windowEl.querySelector('.window-icon');
+            iconEl.setAttribute('data-feather', titles[type].icon);
+            feather.replace(iconEl);
+            
+            // Add to DOM
+            document.getElementById('windows-container').appendChild(windowEl);
+            
+            // Make draggable
+            makeDraggable(windowEl);
+            
+            // Window controls
+            const closeBtn = windowEl.querySelector('.window-close');
+            const minimizeBtn = windowEl.querySelector('.window-minimize');
+            const maximizeBtn = windowEl.querySelector('.window-maximize');
+            
+            closeBtn.addEventListener('click', () => {
+                windowEl.remove();
+                delete windows[type];
+                updateTaskbar();
+                
+                if (type === 'pinball') {
+                    clearInterval(pinballInterval);
+                }
+            });
+            
+            minimizeBtn.addEventListener('click', () => {
+                windowEl.style.opacity = '0';
+                windowEl.style.pointerEvents = 'none';
+            });
+            
+            maximizeBtn.addEventListener('click', () => {
+                if (windowEl.style.width === '100%' && windowEl.style.height === 'calc(100% - 40px)') {
+                    windowEl.style.width = '600px';
+                    windowEl.style.height = '400px';
+                    windowEl.style.left = '50px';
+                    windowEl.style.top = '50px';
+                } else {
+                    windowEl.style.width = '100%';
+                    windowEl.style.height = 'calc(100% - 40px)';
+                    windowEl.style.left = '0';
+                    windowEl.style.top = '0';
+                }
+            });
+            
+            // Focus window when clicked
+            windowEl.addEventListener('mousedown', () => {
+                windowEl.style.zIndex = zIndex++;
+                activeWindow = windowEl;
+            });
+            
+            // Add to windows object
+            windows[type] = windowEl;
+            
+            // Update taskbar
+            updateTaskbar();
+            
+            // Initialize window-specific functionality
+            if (type === 'wallpaper') {
+                initWallpaperWindow(windowEl);
+            } else if (type === 'pinball') {
+                initPinballWindow(windowEl);
+            }
+            
+            return windowEl;
+        }
+        
+        function makeDraggable(element) {
+            const header = element.querySelector('.window-header');
+            
+            header.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                const rect = element.getBoundingClientRect();
+                dragOffsetX = e.clientX - rect.left;
+                dragOffsetY = e.clientY - rect.top;
+                element.style.cursor = 'grabbing';
+            });
+            
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                
+                element.style.left = `${e.clientX - dragOffsetX}px`;
+                element.style.top = `${e.clientY - dragOffsetY}px`;
+            });
+            
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
+                element.style.cursor = '';
+            });
+        }
+        
+        function updateTaskbar() {
+            const taskbar = document.getElementById('taskbar-items');
+            taskbar.innerHTML = '';
+            
+            for (const [type, windowEl] of Object.entries(windows)) {
+                const titles = {
+                    'wallpaper': 'Wallpaper',
+                    'pinball': 'Pinball',
+                    'settings': 'Settings'
+                };
+                
+                const btn = document.createElement('button');
+                btn.className = 'h-8 px-3 flex items-center rounded hover:bg-red-900 text-white';
+                btn.innerHTML = `<span>${titles[type]}</span>`;
+                
+                btn.addEventListener('click', () => {
+                    windowEl.style.zIndex = zIndex++;
+                    windowEl.style.opacity = '1';
+                    windowEl.style.pointerEvents = 'auto';
+                });
+                
+                taskbar.appendChild(btn);
+            }
+        }
+        
+        // Start menu
+        const startBtn = document.getElementById('start-btn');
+        const startMenu = document.getElementById('start-menu');
+        
+        startBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            startMenu.classList.toggle('hidden');
+            if (!startMenu.classList.contains('hidden')) {
+                startMenu.style.transform = 'scale(1)';
+            } else {
+                startMenu.style.transform = 'scale(0)';
+            }
+        });
+        
+        document.addEventListener('click', (e) => {
+            if (!startMenu.contains(e.target) && e.target !== startBtn) {
+                startMenu.classList.add('hidden');
+                startMenu.style.transform = 'scale(0)';
+            }
+        });
+        
+        // Desktop icons
+        document.querySelectorAll('.desktop-icon').forEach(icon => {
+            icon.addEventListener('dblclick', () => {
+                const type = icon.getAttribute('data-window');
+                createWindow(type);
+            });
+        });
+        
+        // Start menu items
+        document.querySelectorAll('[data-window]').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                const type = item.getAttribute('data-window');
+                if (!windows[type]) {
+                    createWindow(type);
+                } else {
+                    windows[type].style.zIndex = zIndex++;
+                    windows[type].style.opacity = '1';
+                    windows[type].style.pointerEvents = 'auto';
+                }
+                startMenu.classList.add('hidden');
+                startMenu.style.transform = 'scale(0)';
+            });
+        });
+        
+        // Shutdown
+        document.getElementById('shutdown-btn').addEventListener('click', (e) => {
+            e.preventDefault();
+            document.getElementById('desktop').classList.add('hidden');
+            document.getElementById('boot-screen').classList.remove('hidden');
+            document.getElementById('boot-progress').style.width = '0%';
+            bootProgress = 0;
+            
+            if (vantaEffect) vantaEffect.destroy();
+            
+            const bootInterval = setInterval(() => {
+                bootProgress += Math.random() * 10;
+                if (bootProgress > 100) bootProgress = 100;
+                document.getElementById('boot-progress').style.width = `${bootProgress}%`;
+                
+                if (bootProgress >= 100) {
+                    clearInterval(bootInterval);
+                    setTimeout(() => {
+                        document.getElementById('boot-screen').classList.add('hidden');
+                        document.getElementById('login-screen').classList.remove('hidden');
+                    }, 500);
+                }
+            }, 300);
+            
+            // Close all windows
+            document.getElementById('windows-container').innerHTML = '';
+            for (const type in windows) {
+                delete windows[type];
+            }
+            updateTaskbar();
+        });
+        
+        // Wallpaper window functionality
+        function initWallpaperWindow(windowEl) {
+            const uploadArea = windowEl.querySelector('#wallpaper-upload');
+            const fileInput = windowEl.querySelector('#wallpaper-input');
+            
+            uploadArea.addEventListener('click', () => {
+                fileInput.click();
+            });
+            
+            fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        document.body.style.backgroundImage = `url(${event.target.result})`;
+                        document.body.style.backgroundSize = 'cover';
+                        document.body.style.backgroundPosition = 'center';
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            // Preset wallpapers
+            windowEl.querySelectorAll('[data-wallpaper]').forEach(el => {
+                el.addEventListener('click', () => {
+                    const num = el.getAttribute('data-wallpaper');
+                    document.body.style.backgroundImage = `url(http://static.photos/red/1200x630/${num})`;
+                    document.body.style.backgroundSize = 'cover';
+                    document.body.style.backgroundPosition = 'center';
+                });
+            });
+            
+            // Live wallpaper buttons
+            windowEl.querySelector('[data-effect="waves"]').addEventListener('click', () => {
+                initVanta('waves');
+            });
+            
+            windowEl.querySelector('[data-effect="cells"]').addEventListener('click', () => {
+                initVanta('cells');
+            });
+        }
+        
+        // Pinball game
+        let pinballInterval;
+        let pinballScore = 0;
+        
+        function initPinballWindow(windowEl) {
+            const canvas = windowEl.querySelector('#pinball-canvas');
+            const ctx = canvas.getContext('2d');
+            const startBtn = windowEl.querySelector('#pinball-start');
+            const scoreDisplay = windowEl.querySelector('#pinball-score');
+            
+            // Game state
+            let ball = { x: 250, y: 650, radius: 10, dx: 0, dy: 0 };
+            let leftFlipper = { x: 150, y: 650, width: 60, height: 10, angle: -30 };
+            let rightFlipper = { x: 350, y: 650, width: 60, height: 10, angle: 30 };
+            let bumpers = [
+                { x: 150, y: 200, radius: 30 },
+                { x: 350, y: 200, radius: 30 },
+                { x: 250, y: 300, radius: 40 }
+            ];
+            let gameRunning = false;
+            
+            // Draw functions
+            function drawBall() {
+                ctx.beginPath();
+                ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+                ctx.fillStyle = '#fff';
+                ctx.fill();
+                ctx.closePath();
+            }
+            
+            function drawFlippers() {
+                // Left flipper
+                ctx.save();
+                ctx.translate(leftFlipper.x, leftFlipper.y);
+                ctx.rotate(leftFlipper.angle * Math.PI / 180);
+                ctx.fillStyle = '#800000';
+                ctx.fillRect(0, -leftFlipper.height/2, leftFlipper.width, leftFlipper.height);
+                ctx.strokeStyle = '#ff0000';
+                ctx.strokeRect(0, -leftFlipper.height/2, leftFlipper.width, leftFlipper.height);
+                ctx.restore();
+                
+                // Right flipper
+                ctx.save();
+                ctx.translate(rightFlipper.x, rightFlipper.y);
+                ctx.rotate(rightFlipper.angle * Math.PI / 180);
+                ctx.fillStyle = '#800000';
+                ctx.fillRect(-rightFlipper.width, -rightFlipper.height/2, rightFlipper.width, rightFlipper.height);
+                ctx.strokeStyle = '#ff0000';
+                ctx.strokeRect(-rightFlipper.width, -rightFlipper.height/2, rightFlipper.width, rightFlipper.height);
+                ctx.restore();
+            }
+            
+            function drawBumpers() {
+                bumpers.forEach(bumper => {
+                    ctx.beginPath();
+                    ctx.arc(bumper.x, bumper.y, bumper.radius, 0, Math.PI * 2);
+                    const gradient = ctx.createRadialGradient(
+                        bumper.x, bumper.y, bumper.radius * 0.3,
+                        bumper.x, bumper.y, bumper.radius
+                    );
+                    gradient.addColorStop(0, '#ff0000');
+                    gradient.addColorStop(1, '#800000');
+                    ctx.fillStyle = gradient;
+                    ctx.fill();
+                    ctx.strokeStyle = '#ff0000';
+                    ctx.stroke();
+                    ctx.closePath();
+                });
+            }
+            
+            function drawTable() {
+                // Table border
+                ctx.strokeStyle = '#800000';
+                ctx.lineWidth = 4;
+                ctx.strokeRect(2, 2, canvas.width - 4, canvas.height - 4);
+                
+                // Plunger
+                ctx.fillStyle = '#400000';
+                ctx.fillRect(230, 680, 40, 15);
+                ctx.strokeStyle = '#800000';
+                ctx.strokeRect(230, 680, 40, 15);
+            }
+            
+            function draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                drawTable();
+                drawBumpers();
+                drawFlippers();
+                drawBall();
+            }
+            
+            // Game logic
+            function update() {
+                // Move ball
+                if (gameRunning) {
+                    ball.x += ball.dx;
+                    ball.y += ball.dy;
+                    
+                    // Wall collisions
+                    if (ball.x - ball.radius < 4 || ball.x + ball.radius > canvas.width - 4) {
+                        ball.dx = -ball.dx * 0.9;
+                    }
+                    if (ball.y - ball.radius < 4) {
+                        ball.dy = -ball.dy * 0.9;
+                    }
+                    
+                    // Bottom out
+                    if (ball.y + ball.radius > canvas.height) {
+                        gameRunning = false;
+                        startBtn.textContent = 'Try Again';
+                        ball.dx = 0;
+                        ball.dy = 0;
+                    }
+                    
+                    // Bumper collisions
+                    bumpers.forEach(bumper => {
+                        const dx = ball.x - bumper.x;
+                        const dy = ball.y - bumper.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        
+                        if (distance < ball.radius + bumper.radius) {
+                            // Collision detected
+                            const angle = Math.atan2(dy, dx);
+                            ball.x = bumper.x + (ball.radius + bumper.radius) * Math.cos(angle);
+                            ball.y = bumper.y + (ball.radius + bumper.radius) * Math.sin(angle);
+                            
+                            // Calculate new direction
+                            const speed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy) * 1.2;
+                            ball.dx = Math.cos(angle) * speed;
+                            ball.dy = Math.sin(angle) * speed;
+                            
+                            // Add score
+                            pinballScore += 100;
+                            scoreDisplay.textContent = pinballScore;
+                        }
+                    });
+                }
+            }
+            
+            // Controls
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowLeft') {
+                    leftFlipper.angle = 30;
+                } else if (e.key === 'ArrowRight') {
+                    rightFlipper.angle = -30;
+                } else if (e.key === ' ' && !gameRunning) {
+                    // Launch ball
+                    ball.dx = (Math.random() - 0.5) * 5;
+                    ball.dy = -10;
+                    gameRunning = true;
+                    pinballScore = 0;
+                    scoreDisplay.textContent = '0';
+                    startBtn.textContent = 'Playing...';
+                }
+            });
+            
+            document.addEventListener('keyup', (e) => {
+                if (e.key === 'ArrowLeft') {
+                    leftFlipper.angle = -30;
+                } else if (e.key === 'ArrowRight') {
+                    rightFlipper.angle = 30;
+                }
+            });
+            
+            // Start button
+            startBtn.addEventListener('click', () => {
+                if (!gameRunning) {
+                    // Reset ball position
+                    ball.x = 250;
+                    ball.y = 650;
+                    ball.dx = 0;
+                    ball.dy = 0;
+                    
+                    // Launch after a delay
+                    setTimeout(() => {
+                        ball.dx = (Math.random() - 0.5) * 5;
+                        ball.dy = -10;
+                        gameRunning = true;
+                        pinballScore = 0;
+                        scoreDisplay.textContent = '0';
+                        startBtn.textContent = 'Playing...';
+                    }, 500);
+                }
+            });
+            
+            // Game loop
+            pinballInterval = setInterval(() => {
+                update();
+                draw();
+            }, 1000/60);
+        }
+    </script>
 </body>
 </html>
-
