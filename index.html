@@ -2,131 +2,270 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Retro Terminal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Дыхание Грома</title>
   <style>
-    body {
-      background: black;
-      color: #33ff33;
-      font-family: monospace;
-      font-size: 16px;
+    @import url('https://fonts.googleapis.com/css2?family=Russo+One&display=swap');
+
+    * {
       margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Russo One', sans-serif;
+    }
+
+    body {
+      background: #0a0a0f;
+      color: #fff;
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+    }
+
+    header {
+      position: relative;
+      height: 100vh;
+      width: 100%;
       overflow: hidden;
     }
 
-    .crt {
-      position: relative;
-      width: 100%;
-      height: 100vh;
-      padding: 20px;
-      box-sizing: border-box;
-      text-shadow: 0 0 5px #33ff33;
-    }
-
-    /* Эффект "сканлайнов" */
-    .crt::before {
-      content: "";
+    header video {
       position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: repeating-linear-gradient(
-        to bottom,
-        rgba(0, 255, 0, 0.1),
-        rgba(0, 255, 0, 0.1) 1px,
-        transparent 2px,
-        transparent 3px
-      );
-      pointer-events: none;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: brightness(0.6);
+      z-index: -1;
     }
 
-    .hidden { display: none; }
-
-    .cursor {
-      display: inline-block;
-      width: 10px;
-      background: #33ff33;
-      animation: blink 1s step-start infinite;
+    header h1 {
+      position: absolute;
+      top: 40%;
+      width: 100%;
+      text-align: center;
+      font-size: 4rem;
+      color: #ffeb3b;
+      text-shadow: 0 0 25px #fdd835, 0 0 50px #ffea00;
+      animation: flicker 2s infinite;
     }
 
-    @keyframes blink {
-      50% { background: transparent; }
-    }
-
-    .file {
-      cursor: pointer;
-      display: block;
-      margin: 2px 0;
-    }
-    .file:hover {
-      text-decoration: underline;
-    }
-
-    #viewer {
-      margin-top: 20px;
-      border-top: 1px dashed #33ff33;
-      padding-top: 10px;
-      white-space: pre-wrap;
-    }
-  </style>
-</head>
-<body>
-  <div class="crt">
-    <div id="boot"></div>
-    <div id="terminal" class="hidden">
-      <p>Directory listing:</p>
-      <span class="file" onclick="openFile('readme')">readme.txt</span>
-      <span class="file" onclick="openFile('story')">story.txt</span>
-      <span class="file" onclick="openFile('notes')">notes.txt</span>
-      <div id="viewer"></div>
-      <span class="cursor"></span>
-    </div>
-  </div>
-
-  <script>
-    const bootLines = [
-      "Booting RetroTerminal v1.0...",
-      "Loading system files...",
-      "Checking memory... OK",
-      "Detecting drives... OK",
-      "Initializing display...",
-      "System ready.",
-      "---------------------------------"
-    ];
-
-    const bootDiv = document.getElementById("boot");
-    const terminal = document.getElementById("terminal");
-    let i = 0;
-
-    function typeLine() {
-      if (i < bootLines.length) {
-        const line = document.createElement("div");
-        line.textContent = bootLines[i];
-        bootDiv.appendChild(line);
-        i++;
-        setTimeout(typeLine, 600);
-      } else {
-        setTimeout(() => {
-          bootDiv.classList.add("hidden");
-          terminal.classList.remove("hidden");
-        }, 1000);
+    @keyframes flicker {
+      0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+        text-shadow: 0 0 25px #fdd835, 0 0 50px #ffea00;
+      }
+      20%, 24%, 55% {
+        text-shadow: none;
       }
     }
 
-    typeLine();
-
-    const files = {
-      "readme": "Добро пожаловать в Retro Terminal!\nЗдесь будут твои файлы.\n",
-      "story": "Здесь можно вставить длинный текст, историю или информацию.\nВсё отображается как в старом .txt документе.\n",
-      "notes": "Заметки:\n- Стилизовано под старый компьютер\n- Можно добавлять свои файлы\n- Легко расширяется"
-    };
-
-    function openFile(name) {
-      const viewer = document.getElementById("viewer");
-      viewer.textContent = files[name] || "Ошибка: файл не найден.";
+    section {
+      padding: 80px 10%;
     }
+
+    .lore h2 {
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+      color: #ffeb3b;
+      text-shadow: 0 0 15px #fdd835;
+      animation: thunderText 3s infinite alternate;
+    }
+
+    @keyframes thunderText {
+      from { text-shadow: 0 0 15px #fdd835; }
+      to { text-shadow: 0 0 40px #ffea00, 0 0 80px #fff176; }
+    }
+
+    .lore p {
+      line-height: 1.8;
+      font-size: 1.1rem;
+      animation: fadeIn 3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .gallery {
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-top: 50px;
+    }
+
+    .card {
+      background: #111;
+      border-radius: 15px;
+      overflow: hidden;
+      width: 280px;
+      box-shadow: 0 0 20px rgba(255, 235, 59, 0.3);
+      transition: transform 0.3s, box-shadow 0.3s;
+      position: relative;
+    }
+
+    .card:hover {
+      transform: scale(1.05) rotate(-1deg);
+      box-shadow: 0 0 30px rgba(255, 235, 59, 0.6);
+    }
+
+    .card img {
+      width: 100%;
+      height: 350px;
+      object-fit: cover;
+    }
+
+    .card h3 {
+      text-align: center;
+      padding: 15px;
+      font-size: 1.4rem;
+      color: #ffeb3b;
+    }
+
+    .nav {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin-top: 50px;
+    }
+
+    .nav a {
+      padding: 15px 25px;
+      background: linear-gradient(90deg, #fdd835, #ffea00);
+      color: #111;
+      text-decoration: none;
+      font-weight: bold;
+      border-radius: 8px;
+      transition: 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .nav a::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: rgba(255,255,255,0.3);
+      transition: left 0.3s;
+    }
+
+    .nav a:hover::after {
+      left: 100%;
+    }
+
+    .nav a:hover {
+      background: #fff176;
+      box-shadow: 0 0 15px #fdd835;
+    }
+
+    .quotes {
+      margin-top: 100px;
+      text-align: center;
+    }
+
+    .quotes p {
+      font-size: 1.5rem;
+      margin: 20px 0;
+      color: #fff59d;
+      text-shadow: 0 0 20px #fdd835;
+      animation: fadeIn 4s ease-in-out;
+    }
+
+    footer {
+      text-align: center;
+      padding: 40px;
+      background: #111;
+      margin-top: 80px;
+      font-size: 0.9rem;
+      color: #bbb;
+    }
+
+    /* Анимация молний */
+    .lightning {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: white;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+  </style>
+</head>
+<body>
+
+  <header>
+    <video autoplay muted loop>
+      <source src="https://cdn.pixabay.com/video/2023/03/06/154454-802085998_tiny.mp4" type="video/mp4">
+    </video>
+    <h1>Дыхание Грома</h1>
+  </header>
+
+  <section class="lore">
+    <h2>Лор дыхания грома</h2>
+    <p>
+      Дыхание Грома — одно из древнейших дыханий, рожденное из Дыхания Солнца. Его стиль основан на молниеносной
+      скорости и разрушительной силе. Владельцы этой техники движутся быстрее глаза, поражая врагов яростными
+      ударами, словно сам небесный гром обрушивается на землю.
+    </p>
+  </section>
+
+  <section class="gallery">
+    <div class="card">
+      <img src="https://i.ibb.co/tCxDQw6/jigoro.jpg" alt="Джигоро Куваджима">
+      <h3>Джигоро Куваджима</h3>
+    </div>
+    <div class="card">
+      <img src="https://i.ibb.co/L1z2rCk/zenitsu.jpg" alt="Зеницу Агацума">
+      <h3>Зеницу Агацума</h3>
+    </div>
+    <div class="card">
+      <img src="https://i.ibb.co/x6Wz8Tq/kaigaku.jpg" alt="Кайгаку">
+      <h3>Кайгаку</h3>
+    </div>
+  </section>
+
+  <section class="nav">
+    <a href="#">Система повышения</a>
+    <a href="#">Дресс-код</a>
+    <a href="#">Устав</a>
+  </section>
+
+  <section class="quotes">
+    <p>⚡ «Я не убегу! Я буду сражаться!» — Зеницу ⚡</p>
+    <p>⚡ «Первый стиль: Гром и молния!» ⚡</p>
+    <p>⚡ «Даже в страхе я найду силу встать!» — Зеницу ⚡</p>
+  </section>
+
+  <footer>
+    ⚡ Сделано в стиле Дыхания Грома ⚡
+  </footer>
+
+  <div class="lightning" id="lightning"></div>
+
+  <audio id="thunder-sound" src="https://www.fesliyanstudios.com/play-mp3/387"></audio>
+
+  <script>
+    // Эффект молний при клике
+    const lightning = document.getElementById('lightning');
+    const thunderSound = document.getElementById('thunder-sound');
+
+    document.addEventListener('click', () => {
+      lightning.style.opacity = 1;
+      thunderSound.currentTime = 0;
+      thunderSound.play();
+      setTimeout(() => lightning.style.opacity = 0, 150);
+    });
   </script>
+
 </body>
 </html>
-
 
 
 
