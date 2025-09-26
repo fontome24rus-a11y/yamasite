@@ -1,0 +1,95 @@
+Дмитрий Eho, [27.09.2025 0:12]
+:root{
+  --bg:#07070a;
+  --card:#0f0f13;
+  --muted:#9aa0b4;
+  --accent:#8a2be2;
+  --accent-2:#5a2be2;
+  --glass: rgba(255,255,255,0.03);
+  --container:1100px;
+  --radius:12px;
+  --mono: 'Montserrat', system-ui, Arial, sans-serif;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:var(--mono);
+  background:radial-gradient(1200px 600px at 10% 20%, rgba(138,43,226,0.08), transparent),
+             linear-gradient(180deg, var(--bg), #020204 120%);
+  color:#e8eaf6;
+  -webkit-font-smoothing:antialiased;
+  line-height:1.5;
+}
+
+/* container */
+.container{max-width:var(--container);margin:0 auto;padding:1.25rem}
+
+/* header */
+.site-header{backdrop-filter: blur(4px);border-bottom:1px solid rgba(255,255,255,0.02)}
+.header-inner{display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:.6rem;text-decoration:none;color:inherit}
+.logo{width:40px;height:40px}
+.brand-title{font-weight:700;color:var(--accent)}
+.main-nav{display:flex;gap:1rem;align-items:center}
+.main-nav a{color:var(--muted);text-decoration:none;padding:.4rem .6rem;border-radius:8px}
+.main-nav a:hover{color:#fff;background:var(--glass)}
+
+/* menu toggle on small */
+.menu-toggle{display:none;background:none;border:0;color:var(--muted);font-size:1.25rem}
+
+/* hero */
+.hero{padding:3rem 0}
+.hero-grid{display:grid;grid-template-columns:1fr 420px;gap:2rem;align-items:center}
+.hero-text h1{font-size:2.6rem;margin:.2rem 0;color: #fff; letter-spacing: -.02em}
+.lead{color:var(--muted);font-size:1.05rem}
+.btn{display:inline-block;background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#fff;padding:.6rem 1rem;border-radius:10px;text-decoration:none;font-weight:600;box-shadow:0 6px 20px rgba(138,43,226,0.12)}
+.btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
+.hero-media .video-card{background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);border-radius:12px;padding:.6rem;box-shadow: 0 8px 30px rgba(0,0,0,0.6)}
+.video-card video{width:100%;height:auto;border-radius:8px;display:block}
+
+/* lore grid */
+.lore-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1rem}
+.lore-grid article{background:var(--card);padding:1rem;border-radius:10px}
+
+/* highlights */
+.cards{display:flex;gap:1rem;margin-top:1rem}
+.card{background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);padding:1rem;border-radius:12px;flex:1;text-decoration:none;color:inherit}
+.card h4{margin:.1rem 0}
+
+/* video grid */
+.video-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+.video-item{background:var(--card);padding:1rem;border-radius:10px}
+.video-item .thumb iframe, .video-item .thumb video{width:100%;height:200px;border-radius:8px}
+
+/* rank panel */
+.rank-panel{display:flex;gap:2rem;margin:2rem 0}
+.player-card{background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);padding:1rem;border-radius:12px;width:100%;max-width:720px}
+.player-card input{width:100%;padding:.6rem;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit;margin:.5rem 0}
+.progress-wrap{margin-top:1rem}
+.progress{background:rgba(255,255,255,0.03);height:14px;border-radius:20px;overflow:hidden}
+.progress-bar{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2));width:0%;transition:width .6s ease}
+.xp-actions{display:flex;gap:.6rem;margin-top:1rem}
+.btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
+
+/* responsive */
+@media (max-width:900px){
+  .hero-grid{grid-template-columns:1fr;gap:1rem}
+  .lore-grid{grid-template-columns:1fr}
+  .video-grid{grid-template-columns:1fr}
+  .cards{flex-direction:column}
+  .main-nav{display:none}
+  .menu-toggle{display:block}
+}
+
+/* footer */
+.site-footer{border-top:1px solid rgba(255,255,255,0.02);margin-top:3rem;padding:1rem 0}
+.footer-inner{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:.9rem}
+
+/* notes and doc */
+.
+
+Дмитрий Eho, [27.09.2025 0:12]
+note{background:linear-gradient(90deg, rgba(138,43,226,0.04), transparent);padding:1rem;border-radius:8px;margin-top:1rem;color:var(--muted)}
+.doc{padding:2rem 0}
