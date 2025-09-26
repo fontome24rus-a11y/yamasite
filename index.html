@@ -1,324 +1,113 @@
-<!DOCTYPE html>
+Дмитрий Eho, [27.09.2025 0:11]
+<!doctype html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Дыхание Грома</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Russo+One&display=swap');
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Russo One', sans-serif;
-    }
-
-    body {
-      background: #0a0a0f;
-      color: #fff;
-      overflow-x: hidden;
-      scroll-behavior: smooth;
-    }
-
-    /* === ХЭДЕР === */
-    header {
-      position: relative;
-      height: 100vh;
-      width: 100%;
-      overflow: hidden;
-    }
-
-    header video {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      filter: brightness(0.6) contrast(1.1) saturate(1.2);
-      z-index: -1;
-    }
-
-    header h1 {
-      position: absolute;
-      top: 40%;
-      width: 100%;
-      text-align: center;
-      font-size: 5rem;
-      color: #ffeb3b;
-      text-shadow: 0 0 25px #fdd835, 0 0 50px #ffea00, 0 0 100px #fff176;
-      animation: flicker 2s infinite;
-    }
-
-    @keyframes flicker {
-      0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
-        text-shadow: 0 0 25px #fdd835, 0 0 50px #ffea00, 0 0 100px #fff176;
-      }
-      20%, 24%, 55% {
-        text-shadow: none;
-      }
-    }
-
-    /* === СЕКЦИИ === */
-    section {
-      padding: 100px 12%;
-    }
-
-    .lore h2 {
-      font-size: 3rem;
-      margin-bottom: 30px;
-      color: #ffeb3b;
-      text-shadow: 0 0 20px #fdd835, 0 0 40px #fff176;
-      animation: thunderText 3s infinite alternate;
-    }
-
-    @keyframes thunderText {
-      from { text-shadow: 0 0 20px #fdd835; }
-      to { text-shadow: 0 0 40px #ffea00, 0 0 100px #fff176; }
-    }
-
-    .lore p {
-      line-height: 1.9;
-      font-size: 1.2rem;
-      animation: fadeIn 3s ease-in-out;
-      max-width: 1000px;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(30px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* === ГАЛЕРЕЯ === */
-    .gallery {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 40px;
-      margin-top: 60px;
-    }
-
-    .card {
-      background: #111;
-      border-radius: 20px;
-      overflow: hidden;
-      width: 300px;
-      box-shadow: 0 0 20px rgba(255, 235, 59, 0.3);
-      transition: transform 0.4s, box-shadow 0.4s;
-      position: relative;
-    }
-
-    .card:hover {
-      transform: scale(1.1) rotate(-1deg);
-      box-shadow: 0 0 40px rgba(255, 235, 59, 0.9);
-    }
-
-    .card img {
-      width: 100%;
-      height: 400px;
-      object-fit: cover;
-      transition: transform 0.5s;
-    }
-
-    .card:hover img {
-      transform: scale(1.1);
-    }
-
-    .card h3 {
-      text-align: center;
-      padding: 20px;
-      font-size: 1.6rem;
-      color: #ffeb3b;
-    }
-
-    /* === НАВИГАЦИЯ === */
-    .nav {
-      display: flex;
-      justify-content: center;
-      gap: 40px;
-      margin-top: 80px;
-    }
-
-    .nav a {
-      padding: 18px 28px;
-      background: linear-gradient(90deg, #fdd835, #ffea00);
-      color: #111;
-      text-decoration: none;
-      font-weight: bold;
-      border-radius: 10px;
-      transition: 0.4s;
-      position: relative;
-      overflow: hidden;
-      font-size: 1.2rem;
-    }
-
-    .nav a::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: rgba(255,255,255,0.4);
-      transition: left 0.4s;
-    }
-
-    .nav a:hover::after {
-      left: 100%;
-    }
-
-    .nav a:hover {
-      background: #fff176;
-      box-shadow: 0 0 25px #fdd835;
-      transform: translateY(-3px);
-    }
-
-    /* === ЦИТАТЫ === */
-    .quotes {
-      margin-top: 120px;
-      text-align: center;
-    }
-
-    .quotes p {
-      font-size: 1.7rem;
-      margin: 25px 0;
-      color: #fff59d;
-      text-shadow: 0 0 25px #fdd835, 0 0 50px #ffea00;
-      animation: fadeIn 4s ease-in-out;
-    }
-
-    /* === ФУТЕР === */
-    footer {
-      text-align: center;
-      padding: 60px;
-      background: #111;
-      margin-top: 100px;
-      font-size: 1rem;
-      color: #bbb;
-      letter-spacing: 2px;
-    }
-
-    /* === АНИМАЦИЯ МОЛНИЙ === */
-    .lightning {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: white;
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    /* === ДОПОЛНИТЕЛЬНЫЕ ЭФФЕКТЫ === */
-    .parallax {
-      background-attachment: fixed;
-      background-size: cover;
-      background-position: center;
-      height: 60vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 3rem;
-      color: #ffeb3b;
-      text-shadow: 0 0 25px #fdd835, 0 0 50px #ffea00;
-    }
-
-    .animated-bg {
-      background: linear-gradient(-45deg, #0a0a0f, #111, #222, #0a0a0f);
-      background-size: 400% 400%;
-      animation: gradientBG 10s ease infinite;
-    }
-
-    @keyframes gradientBG {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-
-  </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Дыхание Грома — Главная</title>
+  <meta name="description" content="Официальный сайт школы 'Дыхание Грома' — лор, медиа, система рангов, дресс-код и устав." />
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="assets/logo.svg">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-
-  <header>
-    <video autoplay muted loop>
-      <source src="https://cdn.pixabay.com/video/2023/03/06/154454-802085998_tiny.mp4" type="video/mp4">
-    </video>
-    <h1>Дыхание Грома</h1>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="index.html">
+        <img src="assets/logo.svg" alt="Логотип Дыхание Грома" class="logo">
+        <span class="brand-title">Дыхание Грома</span>
+      </a>
+      <nav class="main-nav" aria-label="Основная навигация">
+        <a href="lore.html">Лор</a>
+        <a href="videos.html">Медиа</a>
+        <a href="ranks.html">Система повышения</a>
+        <a href="dresscode.html">Дресс-код</a>
+        <a href="charter.html">Устав</a>
+      </nav>
+      <button id="menu-toggle" class="menu-toggle" aria-label="Открыть меню">☰</button>
+    </div>
   </header>
 
-  <section class="lore">
-    <h2>Лор дыхания грома</h2>
-    <p>
-      Дыхание Грома — одно из древнейших дыханий, рожденное из Дыхания Солнца. Его стиль основан на молниеносной
-      скорости и разрушительной силе. Владельцы этой техники движутся быстрее глаза, поражая врагов яростными
-      ударами, словно сам небесный гром обрушивается на землю.
-    </p>
-  </section>
+  <main>
+    <section class="hero">
+      <div class="hero-grid container">
+        <div class="hero-text">
+          <h1>Дыхание Грома</h1>
+          <p class="lead">Сила, ритм и разряд. Освойте технику, почитайте лор и поднимайтесь по ступеням ранг-системы.</p>
+          <div class="hero-cta">
+            <a class="btn" href="videos.html">Смотреть видео</a>
+            <a class="btn btn-ghost" href="ranks.html">Система повышения</a>
+          </div>
+          <ul class="features">
+            <li>Краткий лор и кодексы</li>
+            <li>Галерея обучающих и демонстрационных видео</li>
+            <li>Ранги, XP и персональные метрики</li>
+          </ul>
+        </div>
+        <div class="hero-media" aria-hidden="false">
+          <div class="video-card">
+            <!-- Плейсхолдер — заменяй src -->
+            <video controls muted playsinline poster="assets/hero-bg.jpg">
+              <source src="assets/sample-thunder.mp4" type="video/mp4">
+              Ваш браузер не поддерживает видео.
+            </video>
+            <div class="video-caption">Демонстрация техники — заряд грома</div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-  <div class="parallax animated-bg">
-    ⚡ Мощь, скорость и ярость ⚡
-  </div>
+    <section id="quick-lore" class="container quick-lore">
+      <h2>Краткий лор</h2>
+      <p>Дыхание Грома — система, основанная на контроле ритма дыхания и острой концентрации. Взрыв энергии и звуковой удар сочетаются в секретных техниках, которые передаются из поколения в поколение.</p>
+      <div class="lore-grid">
+        <article>
+          <h3>Происхождение</h3>
+          <p>Героическая легенда о первом волшебнике-громовике, который вызвал шторм и обучил первых учеников.</p>
+        </article>
+        <article>
+          <h3>Принципы</h3>
+          <p>Ритм, интонация и позиция тела — три столпа практики. Без баланса техника разрушает исполнителя.</p>
+        </article>
+        <article>
+          <h3>Практика</h3>
+          <p>Ежедневные дыхательные упражнения, работа с резонансом и контролируемые разряды в специальной экипировке.</p>
+        </article>
+      </div>
+    </section>
 
-  <section class="gallery">
-    <div class="card">
-      <img src="https://i.ibb.co/tCxDQw6/jigoro.jpg" alt="Джигоро Куваджима">
-      <h3>Джигоро Куваджима</h3>
+    <section class="container highlights">
+      <h2>Быстрые ссылки</h2>
+      <div class="cards">
+        <a class="card" href="lore.html">
+          <h4>Полный лор</h4>
+          <p>Развернутая история и мифология Дыхания Грома.</p>
+        </a>
+        <a class="card" href="videos.html">
+          <h4>Галерея видео</h4>
+          <p>Учебные ролики, демонстрации и записи выступлений.</p>
+        </a>
+        <a class="card" href="ranks.html">
+          <h4>Система повышения</h4>
+          <p>Зарабатывай XP, повышай ранг, открывай способности.</p>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <p>© <span id="year"></span> Дыхание Грома — все права защищены</p>
+
+Дмитрий Eho, [27.09.2025 0:11]
+<p class="muted">Сайт — демонстрация. Изображения/видео — плейсхолдеры.</p>
     </div>
-    <div class="card">
-      <img src="https://i.ibb.co/L1z2rCk/zenitsu.jpg" alt="Зеницу Агацума">
-      <h3>Зеницу Агацума</h3>
-    </div>
-    <div class="card">
-      <img src="https://i.ibb.co/x6Wz8Tq/kaigaku.jpg" alt="Кайгаку">
-      <h3>Кайгаку</h3>
-    </div>
-  </section>
-
-  <section class="nav">
-    <a href="#">Система повышения</a>
-    <a href="#">Дресс-код</a>
-    <a href="#">Устав</a>
-  </section>
-
-  <section class="quotes">
-    <p>⚡ «Я не убегу! Я буду сражаться!» — Зеницу ⚡</p>
-    <p>⚡ «Первый стиль: Гром и молния!» ⚡</p>
-    <p>⚡ «Даже в страхе я найду силу встать!» — Зеницу ⚡</p>
-  </section>
-
-  <footer>
-    ⚡ Сделано в стиле Дыхания Грома ⚡
   </footer>
 
-  <div class="lightning" id="lightning"></div>
-  <audio id="thunder-sound" src="https://www.fesliyanstudios.com/play-mp3/387"></audio>
-
-  <script>
-    const lightning = document.getElementById('lightning');
-    const thunderSound = document.getElementById('thunder-sound');
-
-    document.addEventListener('click', () => {
-      lightning.style.opacity = 1;
-      thunderSound.currentTime = 0;
-      thunderSound.play();
-      setTimeout(() => lightning.style.opacity = 0, 150);
-    });
-
-    // Пасхалка при нажатии Z
-    document.addEventListener('keydown', (e) => {
-      if (e.key.toLowerCase() === 'z') {
-        alert('⚡ Скрытая сила Зеницу пробуждена! ⚡');
-      }
-    });
-  </script>
-
+  <script src="app.js" defer></script>
 </body>
 </html>
-
-
-
 
 
 
