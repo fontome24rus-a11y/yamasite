@@ -1,113 +1,165 @@
-Дмитрий Eho, [27.09.2025 0:11]
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Дыхание Грома — Главная</title>
-  <meta name="description" content="Официальный сайт школы 'Дыхание Грома' — лор, медиа, система рангов, дресс-код и устав." />
-  <link rel="stylesheet" href="styles.css">
-  <link rel="icon" href="assets/logo.svg">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retro Console</title>
+<style>
+  body {
+    background-color: #001800;
+    color: #00ff66;
+    font-family: "Courier New", monospace;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  /* Эффект "сканирующего луча" */
+  .scanline {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: rgba(0, 255, 100, 0.1);
+    animation: scan 3s linear infinite;
+  }
+  @keyframes scan {
+    0% { top: 0; }
+    100% { top: 100%; }
+  }
+
+  #loading {
+    text-align: center;
+    font-size: 1.2rem;
+    letter-spacing: 2px;
+    white-space: pre;
+    animation: flicker 0.15s infinite alternate;
+  }
+
+  @keyframes flicker {
+    from { opacity: 0.8; }
+    to { opacity: 1; }
+  }
+
+  #login, #terminal {
+    display: none;
+    text-align: center;
+  }
+
+  input[type="password"] {
+    background: none;
+    border: none;
+    border-bottom: 2px solid #00ff66;
+    color: #00ff66;
+    font-family: "Courier New", monospace;
+    padding: 5px;
+    font-size: 1rem;
+    outline: none;
+    width: 200px;
+    text-align: center;
+  }
+
+  button {
+    background: none;
+    border: 1px solid #00ff66;
+    color: #00ff66;
+    padding: 10px 20px;
+    margin: 10px;
+    cursor: pointer;
+    font-family: "Courier New", monospace;
+    transition: 0.2s;
+  }
+
+  button:hover {
+    background: #00ff66;
+    color: #001800;
+  }
+
+  #output {
+    margin-top: 20px;
+    font-size: 0.95rem;
+    white-space: pre-wrap;
+  }
+
+  #terminal {
+    display: none;
+  }
+
+  .blink {
+    animation: blink 1s step-start infinite;
+  }
+  @keyframes blink {
+    50% { opacity: 0; }
+  }
+
+</style>
 </head>
 <body>
-  <header class="site-header">
-    <div class="container header-inner">
-      <a class="brand" href="index.html">
-        <img src="assets/logo.svg" alt="Логотип Дыхание Грома" class="logo">
-        <span class="brand-title">Дыхание Грома</span>
-      </a>
-      <nav class="main-nav" aria-label="Основная навигация">
-        <a href="lore.html">Лор</a>
-        <a href="videos.html">Медиа</a>
-        <a href="ranks.html">Система повышения</a>
-        <a href="dresscode.html">Дресс-код</a>
-        <a href="charter.html">Устав</a>
-      </nav>
-      <button id="menu-toggle" class="menu-toggle" aria-label="Открыть меню">☰</button>
-    </div>
-  </header>
+<div class="scanline"></div>
 
-  <main>
-    <section class="hero">
-      <div class="hero-grid container">
-        <div class="hero-text">
-          <h1>Дыхание Грома</h1>
-          <p class="lead">Сила, ритм и разряд. Освойте технику, почитайте лор и поднимайтесь по ступеням ранг-системы.</p>
-          <div class="hero-cta">
-            <a class="btn" href="videos.html">Смотреть видео</a>
-            <a class="btn btn-ghost" href="ranks.html">Система повышения</a>
-          </div>
-          <ul class="features">
-            <li>Краткий лор и кодексы</li>
-            <li>Галерея обучающих и демонстрационных видео</li>
-            <li>Ранги, XP и персональные метрики</li>
-          </ul>
-        </div>
-        <div class="hero-media" aria-hidden="false">
-          <div class="video-card">
-            <!-- Плейсхолдер — заменяй src -->
-            <video controls muted playsinline poster="assets/hero-bg.jpg">
-              <source src="assets/sample-thunder.mp4" type="video/mp4">
-              Ваш браузер не поддерживает видео.
-            </video>
-            <div class="video-caption">Демонстрация техники — заряд грома</div>
-          </div>
-        </div>
-      </div>
-    </section>
+<div id="loading">Загрузка системы...</div>
 
-    <section id="quick-lore" class="container quick-lore">
-      <h2>Краткий лор</h2>
-      <p>Дыхание Грома — система, основанная на контроле ритма дыхания и острой концентрации. Взрыв энергии и звуковой удар сочетаются в секретных техниках, которые передаются из поколения в поколение.</p>
-      <div class="lore-grid">
-        <article>
-          <h3>Происхождение</h3>
-          <p>Героическая легенда о первом волшебнике-громовике, который вызвал шторм и обучил первых учеников.</p>
-        </article>
-        <article>
-          <h3>Принципы</h3>
-          <p>Ритм, интонация и позиция тела — три столпа практики. Без баланса техника разрушает исполнителя.</p>
-        </article>
-        <article>
-          <h3>Практика</h3>
-          <p>Ежедневные дыхательные упражнения, работа с резонансом и контролируемые разряды в специальной экипировке.</p>
-        </article>
-      </div>
-    </section>
+<div id="login">
+  <p>Введите пароль доступа:</p>
+  <input type="password" id="password" placeholder="••••••">
+  <p id="error" style="color:red; height:20px;"></p>
+</div>
 
-    <section class="container highlights">
-      <h2>Быстрые ссылки</h2>
-      <div class="cards">
-        <a class="card" href="lore.html">
-          <h4>Полный лор</h4>
-          <p>Развернутая история и мифология Дыхания Грома.</p>
-        </a>
-        <a class="card" href="videos.html">
-          <h4>Галерея видео</h4>
-          <p>Учебные ролики, демонстрации и записи выступлений.</p>
-        </a>
-        <a class="card" href="ranks.html">
-          <h4>Система повышения</h4>
-          <p>Зарабатывай XP, повышай ранг, открывай способности.</p>
-        </a>
-      </div>
-    </section>
-  </main>
+<div id="terminal">
+  <h3>TERMINAL ACCESSED</h3>
+  <button onclick="denied()">Файлы системы</button>
+  <button onclick="denied()">Архивы проекта</button>
+  <button onclick="granted()">Спец. модуль</button>
+  <div id="output"></div>
+  <div class="blink">█</div>
+</div>
 
-  <footer class="site-footer">
-    <div class="container footer-inner">
-      <p>© <span id="year"></span> Дыхание Грома — все права защищены</p>
+<script>
+  const loading = document.getElementById("loading");
+  const login = document.getElementById("login");
+  const terminal = document.getElementById("terminal");
+  const error = document.getElementById("error");
+  const passwordInput = document.getElementById("password");
+  const output = document.getElementById("output");
 
-Дмитрий Eho, [27.09.2025 0:11]
-<p class="muted">Сайт — демонстрация. Изображения/видео — плейсхолдеры.</p>
-    </div>
-  </footer>
+  // Эмуляция загрузки
+  setTimeout(() => {
+    loading.style.display = "none";
+    login.style.display = "block";
+  }, 3000);
 
-  <script src="app.js" defer></script>
+  passwordInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      checkPassword();
+    }
+  });
+
+  function checkPassword() {
+    if (passwordInput.value === "S.J-Ryota") {
+      login.style.display = "none";
+      terminal.style.display = "block";
+    } else {
+      error.textContent = "Неверный пароль.";
+      setTimeout(() => error.textContent = "", 2000);
+      passwordInput.value = "";
+    }
+  }
+
+  function denied() {
+    output.textContent = ">>> ДОСТУП ЗАПРЕЩЕН <<<";
+  }
+
+  function granted() {
+    output.textContent = ">>> ДОСТУП РАЗРЕШЕН <<<\n\nЗдесь будет твой текст...";
+  }
+</script>
 </body>
 </html>
+
+
 
 
 
