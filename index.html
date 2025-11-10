@@ -632,6 +632,69 @@ react to mouse with parallax and slow drift
    - Всё масштабируется относительно окна, canvas responsive.
    - Если хотите звук при вспышках — могу добавить опционально.
    =========================== */
+   /* ========================
+   Дополнение: облака + неоновые всполохи
+   ======================== */
+(function(){
+  const canvas = document.getElementById('bg-canvas');
+  const ctx = canvas.getContext('2d', {alpha:true});
+  let w = innerWidth, h = innerHeight;
+
+  // Создаём облачные слои
+  const clouds = [];
+  for(let i=0;i<8;i++){
+    clouds.push({
+      x: Math.random()*w,
+      y: Math.random()*h*0.6,
+      r: 120 + Math.random()*180,
+      a: 0.05 + Math.random()*0.08,
+      speed: 0.05 + Math.random()*0.12,
+    });
+  }
+
+  // Неоновая подсветка фона
+  let neonPhase = 0;
+
+  function drawClouds(){
+    neonPhase += 0.005;
+    for(const c of clouds){
+      c.x += c.speed;
+      if(c.x - c.r > w) c.x = -c.r;
+      const grd = ctx.createRadialGradient(c.x, c.y, 0, c.x, c.y, c.r);
+      grd.addColorStop(0, `rgba(255,255,255,${c.a*0.8})`);
+      grd.addColorStop(1, `rgba(255,255,255,0)`);
+      ctx.fillStyle = grd;
+      ctx.fillRect(c.x-c.r, c.y-c.r, c.r*2, c.r*2);
+    }
+
+    // Неоновая лёгкая волна по экрану
+    const glow = Math.sin(neonPhase)*0.2 + 0.4;
+    const grd2 = ctx.createLinearGradient(0,0,w,h);
+    grd2.addColorStop(0, `rgba(255,220,180,${glow*0.05})`);
+    grd2.addColorStop(1, `rgba(180,220,255,${glow*0.05})`);
+    ctx.fillStyle = grd2;
+    ctx.fillRect(0,0,w,h);
+  }
+
+  // Встраиваем в существующий цикл рисования lightning
+  const originalDraw = requestAnimationFrame;
+  const observer = new MutationObserver(()=>{
+    // ждём, пока оригинальный draw() появится
+    if(typeof window.requestAnimationFrame === 'function'){
+      // перехват цикла
+      const raf = window.requestAnimationFrame;
+      window.requestAnimationFrame = function(fn){
+        return raf(function(){
+          drawClouds();
+          fn();
+        });
+      };
+      observer.disconnect();
+    }
+  });
+  observer.observe(document.documentElement, {childList:false, subtree:true});
+})();
 </script>
 </body>
 </html>(ma
+
