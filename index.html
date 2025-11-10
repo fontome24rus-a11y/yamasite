@@ -3,173 +3,150 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Дыхание Грома — Официальный шаблон</title>
-
+<title>Дыхание Грома — Аниме-стиль</title>
 <style>
+/* ------------------------------
+   Палитра и базовые стили
+   ------------------------------ */
 :root{
-  --bg-1:#fff6f1;
-  --bg-2:#fff0e6;
-  --peach-1:#ffe9d9;
-  --peach-2:#ffd6b8;
-  --accent:#071a2b;     /* тёмно-синий */
-  --accent-2:#0b2a45;   /* чуть ярче для градиентов */
-  --muted:#65707a;
-  --glass: rgba(255,255,255,0.7);
+  --bg-deep: #0b1230;    /* глубокое ночное небо */
+  --mid-indigo: #12183a;
+  --peach-1: #ffd9c2;
+  --peach-2: #ffc6a3;
+  --neon: #8de0ff;       /* неоновое свечение для молний */
+  --accent-dark: #071a2b;
+  --muted: #9aa6b0;
+  --glass: rgba(255,255,255,0.06);
   --card-radius:16px;
-  --gap:20px;
-  --max-width:1150px;
-  font-family: Inter, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --max-w:1150px;
+  font-family: "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+  color: #e9f6ff;
 }
 
-/* Page layout */
 *{box-sizing:border-box}
-html,body{height:100%}
-body{
-  margin:0;
-  background:
-    radial-gradient(800px 260px at 10% 12%, rgba(255,210,180,0.9), transparent 8%),
-    radial-gradient(900px 300px at 88% 88%, rgba(255,240,230,0.95), transparent 12%),
-    linear-gradient(180deg,var(--bg-1), var(--bg-2));
-  color:var(--accent);
-  overflow-y:scroll;
-  --page-pad:28px;
-}
+html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg-deep), #0e1730 60%);overflow-y:auto}
 
-/* Canvas for effects sits below content */
-#bg-canvas{
-  position:fixed;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:0;
-  mix-blend-mode:screen; /* to make light effects blend nicely */
-}
+/* Canvas layer is behind content */
+#anime-bg{position:fixed;left:0;top:0;width:100%;height:100%;z-index:0;pointer-events:none;mix-blend-mode:screen}
 
 /* Header */
 .header{
-  position:sticky;top:8px;z-index:30;display:flex;align-items:center;justify-content:space-between;
-  gap:16px;padding:14px var(--page-pad);margin:6px;
-  background:linear-gradient(180deg, rgba(255,255,255,0.72), rgba(255,255,255,0.6));
-  border-radius:14px;backdrop-filter: blur(6px);box-shadow:0 10px 30px rgba(7,32,58,0.06);
+  position:sticky;top:12px;z-index:30;margin:12px auto;padding:12px 18px;max-width:calc(var(--max-w) - 40px);
+  background:linear-gradient(180deg, rgba(20,28,56,0.6), rgba(16,22,44,0.45));
+  border-radius:14px;backdrop-filter: blur(6px);display:flex;align-items:center;justify-content:space-between;gap:12px;
+  box-shadow: 0 14px 40px rgba(2,7,20,0.5);
 }
-.brand{display:flex;gap:14px;align-items:center}
+.brand{display:flex;gap:12px;align-items:center}
 .logo{
-  width:64px;height:64px;border-radius:14px;
-  background:conic-gradient(from 180deg at 50% 50%, #ffd1b3 0deg, #ffb88c 120deg, #ffd7bf 260deg);
-  display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--accent);font-size:20px;
-  box-shadow: 0 6px 20px rgba(7,32,58,0.07);
+  width:64px;height:64px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(180deg,#ffdfc6,#ffcaa6);color:var(--accent-dark);font-weight:900;font-size:22px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.45), 0 0 28px rgba(141,224,255,0.06) inset;
 }
-.title{font-size:18px;font-weight:800}
+.title{font-size:18px;font-weight:800;color:#fff}
 .subtitle{font-size:12px;color:var(--muted)}
 
 /* Navigation */
-.nav{display:flex;gap:8px;align-items:center}
+.nav{display:flex;gap:10px}
 .nav button{
-  background:transparent;border:0;padding:10px 14px;border-radius:10px;font-weight:700;color:var(--accent);cursor:pointer;
-  transition:transform .18s ease, box-shadow .18s ease, background .18s ease;
+  background:transparent;border:0;color:#dbefff;padding:10px 14px;border-radius:10px;font-weight:700;cursor:pointer;
+  transition:all .18s ease;
 }
-.nav button:hover{transform:translateY(-3px)}
-.nav button:active{transform:translateY(0)}
-.nav .active{
-  background:linear-gradient(180deg,var(--peach-1),var(--peach-2));
-  box-shadow:0 10px 30px rgba(7,32,58,0.08);
+.nav button:hover{transform:translateY(-3px); color: #fff}
+.nav .active{background:linear-gradient(180deg,#2b3b6f,#22305a);box-shadow:0 8px 24px rgba(11,26,60,0.5)}
+
+/* Container */
+.container{position:relative;z-index:10;max-width:var(--max-w);margin:28px auto;padding:28px;border-radius:18px;overflow:hidden}
+.panel-wrap{
+  display:grid;grid-template-columns:1fr 360px;gap:28px;align-items:start;
 }
+max-width:980px{ .panel-wrap{grid-template-columns:1fr} }
 
-/* Main container */
-.container{
-  max-width:var(--max-width);margin:28px auto;padding:28px;border-radius:18px;
-  background: linear-gradient(180deg, rgba(255,255,255,0.84), rgba(255,255,255,0.78));
-  box-shadow: 0 18px 50px rgba(7,32,58,0.06);
-  position:relative;z-index:10;
+/* Cards */
+.card{
+  background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+  border-radius:var(--card-radius);padding:20px;border:1px solid rgba(255,255,255,0.03);box-shadow:0 10px 34px rgba(0,0,0,0.55);
 }
+h2{margin:0;color:#fff}
+.small{font-size:13px;color:var(--muted)}
 
-/* Grid layout with more 'white space' (разбавленный) */
-.layout{display:grid;grid-template-columns:1fr 360px;gap:28px;align-items:start}
-max-width:980px{ .layout{grid-template-columns:1fr} }
-
-/* Article styling */
-.card{padding:22px;border-radius:var(--card-radius);background:linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.86));box-shadow:0 8px 26px rgba(7,32,58,0.04)}
-.card h2{margin-top:0}
-
-/* History / Photos */
-.history p{color:#2f3c44;line-height:1.6}
+/* Photos block — anime frames */
 .photos{display:flex;gap:14px;margin-top:18px;flex-wrap:wrap}
 .photo-card{
-  flex:1 1 calc(33.333% - 10px);min-width:170px;height:180px;border-radius:12px;
-  background:linear-gradient(180deg, rgba(255,255,255,0.65), rgba(255,255,255,0.45));
-  border:1px solid rgba(7,32,58,0.04);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;
-  transition:transform .22s cubic-bezier(.2,.9,.2,1), box-shadow .22s ease;
-  cursor:pointer;
+  flex:1 1 calc(33.333% - 10px);min-width:160px;height:170px;border-radius:12px;position:relative;overflow:hidden;
+  background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.03);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .2s ease;
 }
-.photo-card:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(7,32,58,0.06)}
+.photo-card:hover{transform:translateY(-6px)}
 .photo-card img{width:100%;height:100%;object-fit:cover;display:block}
-.photo-card .meta{position:absolute;left:10px;bottom:10px;padding:6px 10px;border-radius:10px;background:rgba(7,32,58,0.06);font-size:13px;color:var(--accent)}
-
-/* Aside
-
-
-/
-.aside{padding:18px;border-radius:14px;background:linear-gradient(180deg, rgba(255,255,255,0.85), rgba(255,255,255,0.82));border:1px solid rgba(7,32,58,0.03)}
-.cta{display:flex;flex-direction:column;gap:12px;margin-top:12px}
-
-/* Buttons - interactive with ripple */
-.btn{
-  padding:11px 14px;border-radius:12px;border:0;background:linear-gradient(180deg,var(--accent-2),var(--accent));color:white;font-weight:800;
-  cursor:pointer;position:relative;overflow:hidden;
-  box-shadow:0 8px 24px rgba(7,32,58,0.12);transition:transform .16s ease;
+.photo-meta{
+  position:absolute;left:8px;bottom:8px;padding:6px 10px;border-radius:10px;background:linear-gradient(90deg, rgba(0,0,0,0.45), rgba(0,0,0,0.25));
+  font-size:13px;color:#fff;backdrop-filter: blur(4px);
 }
-.btn:active{transform:translateY(2px)}
-.btn.secondary{background:transparent;border:1px solid rgba(7,32,58,0.08);color:var(--accent);font-weight:700}
-.btn .ripple{position:absolute;border-radius:50%;transform:scale(0);opacity:.35;background:rgba(255,255,255,0.4);pointer-events:none}
 
-/* Ranks & Dress */
+/* Ranks & dress */
 .ranks{display:flex;flex-direction:column;gap:12px;margin-top:12px}
-.rank{padding:14px;border-radius:12px;background:linear-gradient(180deg,#fff,#fff);border-left:6px solid var(--peach-2);box-shadow:0 6px 20px rgba(7,32,58,0.04)}
+.rank{padding:12px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-left:5px solid #ffcc9e}
 .requirements{color:var(--muted);margin-top:6px}
 
 /* Dress grid */
 .dress-list{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:12px}
-max-width:720px{ .dress-list{grid-template-columns:1fr} }
-.dress-item{padding:12px;border-radius:12px;background:linear-gradient(180deg,#fff,#fff);border:1px solid rgba(7,32,58,0.03)}
+@media
 
-/* Transitions for panels */
-.panel{display:none;opacity:0;transform:translateY(8px);transition:opacity .36s ease, transform .36s ease}
+
+x-width:720px){ .dress-list{grid-template-columns:1fr} }
+.dress-item{padding:12px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.02)}
+
+/* Buttons (anime glow) */
+.btn{
+  padding:10px 14px;border-radius:12px;border:0;background:linear-gradient(180deg,#2b3b6f,#233059);color:#fff;font-weight:800;cursor:pointer;
+  box-shadow:0 10px 28px rgba(27,40,80,0.6), 0 0 18px rgba(141,224,255,0.03);position:relative;overflow:hidden;
+}
+.btn:active{transform:translateY(2px)}
+.btn.secondary{background:transparent;border:1px solid rgba(255,255,255,0.06);color:#e6f7ff}
+
+/* tilt */
+.tilt{transform-style:preserve-3d;transition:transform .18s cubic-bezier(.2,.9,.2,1);will-change:transform}
+
+/* panels */
+.panel{display:none;opacity:0;transform:translateY(10px);transition:opacity .36s ease, transform .36s ease}
 .panel.active{display:block;opacity:1;transform:translateY(0)}
 
-/* Small utilities */
-.small{font-size:13px;color:var(--muted)}
-.hr{height:1px;background:linear-gradient(90deg,transparent,rgba(7,32,58,0.04),transparent);margin:14px 0;border-radius:2px}
-footer{margin-top:22px;padding-top:10px;text-align:center;color:var(--muted);font-size:13px}
+/* footer */
+footer{margin-top:22px;text-align:center;color:var(--muted);font-size:13px}
 
-/* Card tilt on mouse move (subtle) */
-.tilt{
-  transform-style:preserve-3d;transition:transform .18s cubic-bezier(.2,.9,.2,1), box-shadow .18s ease;
-  will-change:transform;
+/* small outline for accessibility */
+button:focus{outline:3px solid rgba(141,224,255,0.12);outline-offset:4px}
+
+/* Decorative anime UI lines */
+.anime-frame{
+  position:absolute;pointer-events:none;border-radius:12px;left:8px;right:8px;top:8px;height:120px;
+  background:linear-gradient(90deg, rgba(255,210,180,0.03), rgba(255,255,255,0.01));
+  border:1px solid rgba(255,255,255,0.02);
+  box-shadow: inset 0 -40px 80px rgba(255,150,120,0.02);
+  filter:blur(12px);transform:translateZ(0);
 }
 
-/* Accessibility focus */
-button:focus, a:focus {outline:3px solid rgba(11,42,73,0.12);outline-offset:3px}
-
-/* subtle decorative rule */
-.header-decor{
-  position:absolute;left:12px;top:12px;width:120px;height:120px;border-radius:20px;
-  background:linear-gradient(180deg, rgba(255,220,180,0.12), rgba(255,200,160,0.06));
-  filter:blur(30px);pointer-events:none;z-index:0;
-}
+/* small helper for neon outlines on hover */
+.neon-hover:hover{box-shadow:0 6px 30px rgba(141,224,255,0.08), 0 0 28px rgba(141,224,255,0.06)}
 </style>
 </head>
 <body>
 
-<!-- Canvas for lightning/parallax -->
-<canvas id="bg-canvas" aria-hidden="true"></canvas>
+<!-- Canvas for anime clouds & lightning -->
+<canvas id="anime-bg" aria-hidden="true"></canvas>
 
 <header class="header" role="banner">
   <div class="brand">
     <div class="logo">DG</div>
     <div>
-      <div class="title">Дыхание Грома — Официальный сайт</div>
+      <div class="title">Дыхание Грома — Аниме-офиц.</div>
       <div class="subtitle">Отряд — Garry's Mod</div>
     </div>
   </div>
 
-  <nav class="nav" role="navigation" aria-label="Основные разделы">
+  <nav class="nav" role="navigation" aria-label="Разделы">
     <button class="nav-btn active" data-tab="home">Главная</button>
     <button class="nav-btn" data-tab="ranks">Система повышений</button>
     <button class="nav-btn" data-tab="dress">Дресс-код</button>
@@ -177,165 +154,166 @@ button:focus, a:focus {outline:3px solid rgba(11,42,73,0.12);outline-offset:3px}
 </header>
 
 <main class="container" role="main">
-  <div class="layout">
-    <!-- Left content -->
+  <div class="panel-wrap">
+    <!-- Левый столбец -->
     <section>
-      <!-- Home panel -->
+      <!-- Home -->
       <div id="home" class="panel active">
-        <article class="card tilt" id="history-card" aria-labelledby="history-title">
-          <h2 id="history-title">Наша история</h2>
+        <article class="card tilt" id="history-card">
+          <div class="anime-frame" style="top:10px;left:12px;right:auto;width:160px;height:80px;"></div>
+          <h2>Наша история — в стиле аниме</h2>
           <p>
-            Добро пожаловать в официальный раздел отряда <strong>«Дыхание Грома»</strong>.
-            Мы — организованная команда Garry's Mod, ориентированная на ролевые сценарии, тактическую игру
-            и атмосферное взаимодействие. Наш сайт — источник правил, статусов и примеров формы.
+            Официальный отряд «Дыхание Грома» — ролевой коллектив Garry's Mod. Эта страница — эстетический журнал отряда:
+            тут хранятся истории, фотографии операций и правила. Стиль — аниме-грозовой, с энергией и драмой.
           </p>
-          <p class="small">Совет: замените текст на вашу расширенную хронику (важные операции, даты, ключевые игроки).</p>
+          <p class="small">Замените текст на свою подробную хронику: ключевые операции, даты и важные игроки.</p>
 
-          <div class="hr"></div>
+          <div class="hr" style="height:1px;margin:14px 0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.03),transparent)"></div>
 
-          <div>
-            <h3>Фотографии и примеры</h3>
-            <div class="photos" aria-label="Фотослоты отряда">
-              <label class="photo-card" aria-label="Фото 1" title="Нажмите
+          <h3 style="margin-bottom:10px">Фотографии (примерные кадры)</h3>
+          <div class="photos" aria-label="Фотослоты">
+            <label class="photo-card" title="Нажмите для загрузки">
+              <input type="file" accept="image/*" style="display:none" data-slot="0">
+              <div style="text-align:center">
+                <svg width="56" height="56" viewBox="0 0 24 24" fill="none" style="opacity:0.85">
+                  <path d="M3 7a4 4 0 014-4h10a4 4 0 014 4v10a4 4 0 01-4 4H7a4 4 0 01-4-4V7z" stroke="#fff" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M8 14l2.5-3L13 16l3-5 3 6" stroke="#fff" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <div class="photo-meta">Фото 1</div>
+            </label>
+
+            <label clas
 
 
-для загрузки">
-                <input type="file" accept="image/*" data-slot="0" />
-                <div class="photo-uploader">
-                  <div class="small">Нажмите или перетащите</div>
-                  <div class="small muted">Фото 1 — Операция</div>
-                </div>
-                <div class="meta">Фото 1</div>
-              </label>
+s="photo-card" title="Нажмите для загрузки">
+              <input type="file" accept="image/*" style="display:none" data-slot="1">
+              <div style="text-align:center">
+                <svg width="56" height="56" viewBox="0 0 24 24" fill="none" style="opacity:0.85">
+                  <path d="M12 2v20" stroke="#fff" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M3 7h18" stroke="#fff" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <div class="photo-meta">Фото 2</div>
+            </label>
 
-              <label class="photo-card" aria-label="Фото 2" title="Нажмите для загрузки">
-                <input type="file" accept="image/*" data-slot="1" />
-                <div class="photo-uploader">
-                  <div class="small">Нажмите или перетащите</div>
-                  <div class="small muted">Фото 2 — Команда</div>
-                </div>
-                <div class="meta">Фото 2</div>
-              </label>
-
-              <label class="photo-card" aria-label="Фото 3" title="Нажмите для загрузки">
-                <input type="file" accept="image/*" data-slot="2" />
-                <div class="photo-uploader">
-                  <div class="small">Нажмите или перетащите</div>
-                  <div class="small muted">Фото 3 — Мем/скрин</div>
-                </div>
-                <div class="meta">Фото 3</div>
-              </label>
-            </div>
+            <label class="photo-card" title="Нажмите для загрузки">
+              <input type="file" accept="image/*" style="display:none" data-slot="2">
+              <div style="text-align:center">
+                <svg width="56" height="56" viewBox="0 0 24 24" fill="none" style="opacity:0.85">
+                  <path d="M5 12h14M8 16h8" stroke="#fff" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <div class="photo-meta">Фото 3</div>
+            </label>
           </div>
         </article>
       </div>
 
-      <!-- Ranks panel -->
+      <!-- Ranks -->
       <div id="ranks" class="panel" aria-labelledby="ranks-title">
         <article class="card tilt" id="ranks-card">
           <h2 id="ranks-title">Система повышений</h2>
-          <p class="small">Пример официальной схемы повышение рангов. Настроить под правила сервера.</p>
+          <p class="small">Аниме-стилизованная система — официальная, понятная, с визуальными метками.</p>
 
           <div class="ranks" role="list">
             <div class="rank" role="listitem">
               <h4>Новобранец</h4>
-              <div class="requirements">Вступление, прохождение вводной тренировки, 2 недели активности.</div>
+              <div class="requirements">Вводный курс, 2 недели активности, 3 тренировки.</div>
             </div>
 
             <div class="rank" role="listitem">
               <h4>Штурмовик</h4>
-              <div class="requirements">Участие в 10 операциях, знание тактик, командная игра.</div>
+              <div class="requirements">10 операций, умение работать в связке, знание тактик.</div>
             </div>
 
             <div class="rank" role="listitem">
               <h4>Сержант</h4>
-              <div class="requirements">Командование отрядом, ведение 3 операций, положительные отзывы.</div>
+              <div class="requirements">Управление отрядом, успешное руководство операциями, отчёты.</div>
             </div>
 
             <div class="rank" role="listitem">
               <h4>Офицер</h4>
-              <div class="requirements">Проведение инструктажей, 30+ часов роли, доказанный вклад.</div>
+              <div class="requirements">Проведение занятий, 30+ часов ролевой активности.</div>
             </div>
 
             <div class="rank" role="listitem">
               <h4>Командир</h4>
-              <div class="requirements">Назначение руководством; ответственность и стратегическое видение.</div>
+              <div class="requirements">Назначение; стратегическое мышление и вклад в сообщество.</div>
             </div>
           </div>
 
-          <div class="hr"></div>
-          <p class="small muted">Подсказка: храните журналы повышения (даты, доказательства) — это облегчает спорные назначения.</p>
+          <div style="height:10px"></div>
+          <p class="small muted">Совет: добавьте иконки-эмблемы для каждого ранга (аниме-стикеры выглядят круто).</p>
         </article>
       </div>
 
-      <!-- Dress panel -->
+      <!-- Dress -->
       <div id="dress" class="panel" aria-labelledby="dress-title">
         <article class="card tilt" id="dress-card">
           <h2 id="dress-title">Дресс-код</h2>
-          <p class="small">Единый внешний вид повышает узнаваемость и атмосферу. Примеры и запреты ниже.</p>
+          <p class="small">Аниме-эстетика — аккуратные элементы формы, фирменная палитра.</p>
 
           <div class="dress-list" role="list">
             <div class="dress-item" role="listitem">
               <h5>Основной комплект</h5>
-              <div class="example small">Тёмно-синий жилет, персиковая нашивка «DG», чёрные тактические штаны.</div>
+              <div class="small">Тёмно-индиго жилет, персиковая эмблема «DG», тактические штаны.</div>
             </div>
 
             <div class="dress-item" role="listitem">
-              <h5>Офицерский комплект</h5>
-              <div class="example small">Светлая куртка, эмблема, доп. значки и фонарик.</div>
+              <h5>Офицерский</h5>
+              <div class="small">Светлая куртка, дополнительные знаки, плащ при церемониях (аниме-стиль).</div>
             </div>
 
             <div class="dress-item" role="listitem">
-              <h5>Оперативный камуфляж</h5>
-              <div class="example small">Тёмно-персиковый/песочный камуфляж, каска, очки.</div>
+              <h5>Оперативный</h5>
+              <div class="small">Камуфляж персиково-песочный, каска, очки.</div>
             </div>
 
             <div class="dress-item" role="listitem">
               <h5>Запрещено</h5>
-              <div class="example small">Яркие неоновые костюмы, символика враждебных фракций.</div>
+              <div class="small">Неоновые костюмы, символика чужих фракций.</div>
             </div>
-
-
-</div>
-
-          <div class="hr"></div>
-          <p class="small muted">Рекомендация: добавьте в фотосекции примеры допустимой/недопустимой формы для быстрого справочника.</p>
+          </div>
         </article>
       </div>
     </section>
 
-    <!-- Right aside -->
-    <aside class="aside">
-      <div class="card" style="padding:16px">
+    <!-- Правый столбец (aside) -->
+    <aside>
+      <div class="card">
         <h3>Коротко</h3>
-        <div class="small">Отряд: <strong>Дыхание Грома</strong></div>
+        <div class="sma
+
+
+ll" style="color:#fff;margin-bottom:8px"><strong>Дыхание Грома</strong> — аниме-версия</div>
         <div class="small">Платформа: Garry's Mod</div>
 
-        <div class="cta">
-          <button class="btn" id="download-style">Скачать HTML</button>
-          <button class="btn secondary" id="toggle-sound">Звук всполохов: <span id="sound-state">Выкл</span></button>
+        <div style="height:12px"></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn" id="download-html">Скачать HTML</button>
+          <button class="btn secondary" id="toggle-light">Молнии: Вкл</button>
         </div>
       </div>
 
-      <div style="height:18px"></div>
+      <div style="height:12px"></div>
 
       <div class="card small">
         <h4>Интерактив</h4>
-        <p class="small muted">Передвиньте курсор — увидите электрические всполохи в фоне. Клик — сильная вспышка.
-        Кнопки имеют эффект «ripple» при нажатии.</p>
+        <p class="small">Перемещай курсор — облака и сияние реагируют. Клик — аниме-молния. Кнопки подсвечиваются.</p>
       </div>
     </aside>
   </div>
 
   <footer>
-    © <span id="year"></span> Дыхание Грома — Официальный шаблон. Сделано для сообщества Garry's Mod.
+    © <span id="year"></span> Дыхание Грома — Аниме-шаблон.
   </footer>
 </main>
 
 <script>
-/* ========================
-   UI: Tabs, ripple, uploads, tilt
-   ======================== */
+/* ===========================
+   Core UI features: tabs, uploads, tilt, download button
+   =========================== */
 document.addEventListener('DOMContentLoaded', ()=> {
   // Tabs
   const navBtns = document.querySelectorAll('.nav-btn');
@@ -345,33 +323,13 @@ document.addEventListener('DOMContentLoaded', ()=> {
       btn.classList.add('active');
       const tab = btn.dataset.tab;
       document.querySelectorAll('.panel').forEach(p=>{
-        if(p.id === tab){ p.classList.add('active'); p.scrollIntoView({behavior:'smooth', block:'start'});}
+        if(p.id === tab){ p.classList.add('active'); p.scrollIntoView({behavior:'smooth', block:'start'}); }
         else p.classList.remove('active');
       });
     });
   });
 
-  // Ripple effect for buttons
-  document.querySelectorAll('.btn').forEach(button=>{
-    button.addEventListener('click', function(e){
-      // create ripple
-      const rect = this.getBoundingClientRect();
-      const circle = document.createElement('span');
-      circle.className = 'ripple';
-      const size = Math.max(rect.width, rect.height) * 1.6;
-      circle.style.width = circle.style.height = size + 'px';
-      circle.style.left = (e.clientX - rect.left - size/2) + 'px';
-      circle.style.top = (e.clientY - rect.top - size/2) + 'px';
-      this.appendChild(circle);
-      // animate
-      circle.style.transition = 'transform .6s cubic-bezier(.2,.9,.2,1), opacity .6s ease';
-      requestAnimationFrame(()=> circle.style.transform = 'scale(1)');
-      circle.style.opacity = '0';
-      setTimeout(()=> circle.remove(), 700);
-    });
-  });
-
-  // Photo upload previews + drag&drop
+  // Photo uploads: preview
   function handleFileInput(input){
     const file = input.files && input.files[0];
     if(!file) return;
@@ -385,234 +343,295 @@ document.addEventListener('DOMContentLoaded', ()=> {
   document.querySelectorAll('input[type=file]').forEach(inp=>{
     inp.addEventListener('change', ()=> handleFileInput(inp));
     const label = inp.closest('label');
-    label.addEventListener('dragover', e=>{ e.preventDefault(); label.style.borderColor='rgba(7,32,58,0.12)'; });
+    // drag & drop
+    label.addEventListener('dragover', e=>{ e.preventDefault(); label.style.borderColor='rgba(141,224,255,0.14)'; });
     label.addEventListener('dragleave', e=>{ label.style.borderColor=''; });
-    label.addEventListener('drop', e=>{ e.preventDefault(); label.style.borderColor=''; if(e.dataTransfer.files) { inp.files = e.dataTransfer.files; handleFileInput(inp); }});
+    label.addEventListener('drop', e=>{ e.preventDefault(); label.style.borderColor=''; if(e.dataTransfer.files){ inp.files = e.dataTransfer.files; handleFileInput(inp); }});
+    // click handler to open file input (labels have input hidden)
+    label.addEventListener('click', ()=> inp.click());
   });
 
-  // Download HTML template (serializes current DOM)
-  document.getElementById('download-style').addEventListener('click', ()=>{
-    const doctype = '<!doctype html>\\n';
-    const html = document.documentElement.outerHTML;
-    const blob = new Blob([doctype + html], {type:'text/html;charset=utf-8'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = 'dyhanie_groma_official.html';
-    document.body.appendChild(a); a.click(); a.remove();
-    UR
-
-
-L.revokeObjectURL(url);
-  });
-
-  // Tilt effect on cards (subtle)
-  const tiltItems = document.querySelectorAll('.tilt');
-  tiltItems.forEach(el=>{
+  // Tilt for cards
+  const tiltEls = document.querySelectorAll('.tilt');
+  tiltEls.forEach(el=>{
     el.addEventListener('mousemove', (e)=>{
       const r = el.getBoundingClientRect();
       const px = (e.clientX - r.left) / r.width;
       const py = (e.clientY - r.top) / r.height;
-      const rx = (py - 0.5) * 6; // rotateX
-      const ry = (px - 0.5) * -6; // rotateY
+      const rx = (py - 0.5) * 6;
+      const ry = (px - 0.5) * -6;
       el.style.transform = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg)`;
     });
     el.addEventListener('mouseleave', ()=> el.style.transform = 'perspective(900px) rotateX(0deg) rotateY(0deg)');
   });
 
-  // Sound toggle for flashes (simple)
-  let soundEnabled = false;
-  const soundBtn = document.getElementById('toggle-sound');
-  const soundState = document.getElementById('sound-state');
-  soundBtn.addEventListener('click', ()=> {
-    soundEnabled = !soundEnabled;
-    soundState.textContent = soundEnabled ? 'Вкл' : 'Выкл';
+  // Download
+  document.getElementById('download-html').addEventListener('click', ()=>{
+    const doctype = '<!doctype html>\\n';
+    const html = document.documentElement.outerHTML;
+    const blob = new Blob([doctype + html], {type:'text/html;charset=utf-8'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'dyhanie_groma_anime.html';
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
   });
 
-  // Year
+  // lightning toggle (simple)
+  const toggle = document.getElementById('toggle-light');
+  let lightningOn = true;
+  toggle.addEventListener('click', ()=>{
+    lightningOn = !lightningOn;
+    toggle.textContent = lightningOn ? 'Молнии: Вкл' : 'Молнии: Выкл';
+    window.ANIME_LIGHTING = lightningOn;
+  });
+
   document.getElementById('year').textContent = new Date().getFullYear();
 });
 
-/* ========================
-   Canvas effects: lightning + parallax glow
-   ======================== */
+/* ===========================
+   Anime background: layered stylized clouds + neon lightning
+   Canvas draws:
+   - moving stylized cloud layers (parallax)
+   - ani
+
+
+mated lightning bolts (stylized anime strokes)
+   - soft glow / particles
+   =========================== */
 (function(){
-  const canvas = document.getElementById('bg-canvas');
+  const canvas = document.getElementById('anime-bg');
   const ctx = canvas.getContext('2d', {alpha:true});
-  let w = canvas.width = innerWidth;
-  let h = canvas.height = innerHeight;
-  let mouse = {x: w/2, y: h/2, vx:0, vy:0};
-  let pointers = []; // recent pointer trail
-  const maxTrail = 20;
-  // lightning bolts stored and drawn with life
-  const bolts = [];
+  let W = canvas.width = innerWidth;
+  let H = canvas.height = innerHeight;
 
-  // resize
-  window.addEventListener('resize', ()=> {
-    w = canvas.width = innerWidth;
-    h = canvas.height = innerHeight;
-  });
+  // responsiveness
+  window.addEventListener('resize', ()=> { W = canvas.width = innerWidth; H = canvas.height = innerHeight; });
 
-  // throttled mousemove
-  let lastMove = 0;
-  window.addEventListener('mousemove', (e)=> {
-    const now = performance.now();
-    mouse.vx = (e.clientX - mouse.x);
-    mouse.vy = (e.clientY - mouse.y);
+  // mouse trail for parallax
+  const mouse = {x: W/2, y: H/2, vx:0, vy:0};
+  const trail = [];
+  const maxTrail = 18;
+
+  window.addEventListener('mousemove', (e)=>{
+    mouse.vx = e.clientX - mouse.x; mouse.vy = e.clientY - mouse.y;
     mouse.x = e.clientX; mouse.y = e.clientY;
-    pointers.push({x:mouse.x, y:mouse.y, t:now});
-    if(pointers.length>maxTrail) pointers.shift();
+    trail.push({x:mouse.x, y:mouse.y, t:performance.now()});
+    if(trail.length > maxTrail) trail.shift();
 
-    // occasionally spawn small bolts on rapid movement
-    if(now - lastMove > 40 && (Math.abs(mouse.vx)+Math.abs(mouse.vy) > 10)) {
-      spawnBolt(mouse.x, mouse.y, 0.6);
-      lastMove = now;
+    // spawn small lightning on quick moves
+    if(Math.abs(mouse.vx) + Math.abs(mouse.vy) > 18 && Math.random() < 0.35){
+      spawnBolt(mouse.x, mouse.y, 0.8);
     }
   });
 
-  // clicks spawn bigger flashes
-  window.addEventListener('click', (e)=> {
-    spawnBolt(e.clientX, e.clientY, 1.4, true);
-    if(window.soundEnabled) playTone();
-    // temporary heavy glow
+  // click big lightning
+  window.addEventListener('click', (e)=>{
+    spawnBolt(e.clientX, e.clientY, 1.6, true);
     heavyFlash();
   });
 
-  // helper: spawn lightning bolt
-  function spawnBolt(x,y,intensity=1,branch=false){
-    // bolt defined by segments; jitter will create zigzag
-    const len = (120 + Math.random()*220) * intensity;
-    const angle = (Math.random()*Math.PI*2);
-    const sx = x; const sy = y;
-    const ex = sx + Math.cos(angle) * len;
-    const ey = sy + Math.sin(angle) * len;
-    bolts.push({
-      x:sx,y:sy,ex,ey,life:1.0,decay:0.02 + Math.random()*0.03, width:1.2 * intensity, branch:branch
+  // cloud layers
+  const layers = [];
+  const layerCount = 4;
+  for(let i=0;i<layerCount;i++){
+    layers.push({
+      offsetX: 0,
+      speed: 0.12 + i*0.05,
+      scale: 1 + i*0.08,
+      y: H * (0.08 + i*0.18),
+      alpha: 0.12 + i*0.06,
+      hue: 210 - i*6
     });
   }
 
-  // heavy flash effect parameters
-  let flashAlpha = 0;
-  function heavyFlash(){ flashAlpha = Math.max(flashAlpha, 0.85); }
+  // lightning bolts
+  const bolts = [];
 
-  // optional simple sound (WebAudio)
-  const audioCtx = (typeof AudioContext !== 'undefined') ? new AudioContext() : null;
-  function playTone(){
-    if(!audioCtx) return;
-    const o = audioCtx.createOscillator();
-    const g = audioCtx.createGain();
-    o.type = 'sine';
-    o.frequency.value = 220 + Math.random()*220;
-    g.gain.value = 0.0001;
-    o.connect(g); g.connect(audioCtx.destination);
-    const now = audioCtx.currentTime;
-    g.gain.exponentialRampToValueAtTime(0.08, now + 0.01);
-    g.gain.exponentialRampToValueAtTime(0.0001, now + 0.25);
-    o.start(now); o.stop(now + 0.26);
+  function rand(min,max){ return min + Math.random()*(max-min) }
+
+  function spawnBolt(x,y,intensity=1,branch=false){
+    // limit if disabled
+    if(window.ANIME_LIGHTING === false) return;
+    const len = 140 + Math.random()*220;
+    const angle = (-Math.PI/2) + (Math.random()-0.5) * Math.PI * 0.6; // mostly downward/godray
+    const ex = x + Math.cos(angle) * len;
+    const ey = y + Math.sin(angle) * len;
+    bolts.push({
+      x,y,ex,ey,life:1,decay:0.02 + Math.random()*0.04, width:2.0*intensity, hue: 185 + Math.random()*40, branch
+    });
   }
 
-  // main draw loop
-  function draw(){
-    ctx.clearRect(0,0,w,h);
+  // flash overlay
+  let flash = 0;
 
-    // subtle background radial glow following pointer (parallax)
-    // draw multiple soft circles based on pointer trail
-    for(let i=0;i<pointers.length;i++){
-      const p = pointers[Math.max(0, pointers.length-1 - i)];
-      const age = (performance.now() - p.t) / 800;
-      const alpha = Math.max(0, 0.16 * (1 - age));
-      if(alpha<=0) continu
-Performance.now
-www.dn.now
+  function heavyFlash(){ flash = Math.max(flash, 0.9); }
 
+  // particles (sparkles)
+  const particles = [];
 
-e;
-      const radius = 80 + i*10;
-      const grd = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, radius);
-      grd.addColorStop(0, `rgba(255,220,180,${alpha*0.22})`);
-      grd.addColorStop(1, `rgba(255,200,160,0)`);
-      ctx.fillStyle = grd;
-      ctx.fillRect(p.x-radius, p.y-radius, radius*2, radius*2);
+  function spawnParticles(x,y, count=10){
+    for(let i=0;i<count;i++){
+      particles.push({
+        x,y,
+        vx: (Math.random()-0.5)*6,
+        vy: (Math.random()-1.5)*6,
+        life: 1, decay: 0.02 + Math.random()*0.04,
+        r: 1 + Math.random()*2,
+        hue: 200 + Math.random()*60
+      });
+    }
+  }
+
+  // draw stylized cloud shape (smooth blob) using bezier-ish shapes
+  function drawCloudLayer(layer, t){
+    const baseY = layer.y + Math.sin(t * 0.0006 * (1 + layer.speed)) * 18;
+    // create gradient
+    const g = ctx.createLinearGradient(0, baseY - 180*layer.scale, 0, baseY + 80*layer.scale);
+    g.addColorStop(0, `rgba(20,28,56,${0.0 + layer.alpha})`);
+    g.addColorStop(0.5, `rgba(30,38,66,${0.22 * layer.alpha})`);
+    g.addColorStop(1, `rgba(220,170,140,${0.02 * layer.alpha})`);
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    const steps = 8;
+    const wave = 80 * layer.scale;
+    const segW = W / (steps - 1);
+    ctx.moveTo(-segW, baseY + 40*layer.scale);
+    for(let i=0;i<=steps;i++){
+      const px = i * segW + (layer.offsetX % (segW*2)) - segW;
+      const nx = px + Math.sin((t*0.0008 + i) * 1.4) * (12 * layer.scale);
+      const ny = baseY + Math.cos((t*0.001 + i) * 0.9) * (18 * layer.scale) - Math.abs(Math.sin((i/steps)*Math.PI))*wave;
+      ctx.quadraticCurveTo(px, ny - 22*layer.scale, nx, ny);
+    }
+    ctx.lineTo(W + segW, H + 200);
+    ctx.lineTo(-segW, H + 200);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  // Main loop
+  let last = performance.now();
+  function loop(now){
+    const dt = now - last; last = now;
+    ctx.clearRect(0,0,W,H);
+
+    // background gradient (deep)
+    const bg = ctx.createLinearGradient(0,0,0,H);
+    bg.addColorStop(0, '#081025');
+    bg.addColorStop(1, '#081226');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0,0,W,H);
+
+    // update cloud layers offsets (parallax using mouse x)
+    for(let i=0;i<layers.length;i++){
+      const L = layers[i];
+      //
+
+react to mouse with parallax and slow drift
+      const target = (mouse.x - W/2) * 0.02 * (i+1);
+      L.offsetX += (target - L.offsetX) * 0.08;
+      L.offsetX += Math.sin(now*0.0002*(i+1))*0.2;
+      drawCloudLayer(L, now);
     }
 
-    // lighter ambient layer (slow moving)
-    const t = performance.now() / 4000;
-    const xOff = Math.cos(t) * 120;
-    const yOff = Math.sin(t*0.6) * 80;
-    const grd2 = ctx.createLinearGradient(0 + xOff, 0 + yOff, w - xOff, h - yOff);
-    grd2.addColorStop(0, 'rgba(255,230,210,0.06)');
-    grd2.addColorStop(1, 'rgba(255,245,240,0.02)');
-    ctx.fillStyle = grd2;
-    ctx.fillRect(0,0,w,h);
+    // glow following cursor (soft anime glow)
+    for(let j=trail.length-1;j>=0;j--){
+      const p = trail[j];
+      const age = (now - p.t) / 900;
+      if(age > 1) continue;
+      const a = (1 - age) * 0.16;
+      const r = 80 + (1-age)*60;
+      const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r);
+      grad.addColorStop(0, `rgba(141,224,255,${a})`);
+      grad.addColorStop(1, 'rgba(255,200,170,0)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(p.x-r, p.y-r, r*2, r*2);
+    }
 
-    // draw bolts
+    // draw lightning bolts (anime style)
     for(let i=bolts.length-1;i>=0;i--){
       const b = bolts[i];
-      // compute segments
-      const segs = 14;
-      ctx.lineCap = 'round';
+      // dynamic segments with sharp style
+      const segs = 10 + Math.floor(Math.random()*6);
       ctx.globalCompositeOperation = 'lighter';
-      for(let s=0;s<1;s+=1){
-        ctx.beginPath();
-        const width = b.width * (1 + Math.random()*0.8);
-        ctx.lineWidth = width;
-        ctx.strokeStyle = `rgba(255,255,255,${0.9 * b.life})`;
-        let prevx = b.x, prevy = b.y;
-        for(let j=1;j<=segs;j++){
-          const t = j / segs;
-          // linear interpolation + noise
-          let nx = b.x + (b.ex - b.x) * t + (Math.random()-0.5) * 24 * (1 - t);
-          let ny = b.y + (b.ey - b.y) * t + (Math.random()-0.5) * 24 * (1 - t);
-          ctx.lineTo(nx, ny);
-          prevx = nx; prevy = ny;
-        }
-        ctx.stroke();
-      }
-      // outer glow
+      // thick inner stroke (neon)
       ctx.beginPath();
-      ctx.strokeStyle = `rgba(180,220,255,${0.18 * b.life})`;
-      ctx.lineWidth = b.width * 6;
-      ctx.moveTo(b.x, b.y);
-      ctx.lineTo(b.ex, b.ey);
+      ctx.lineWidth = Math.max(1, b.width * 8) * b.life;
+      ctx.strokeStyle = `rgba(141,224,255,${0.9 * b.life})`;
+      let prevx = b.x, prevy = b.y;
+      for(let s=1;s<=segs;s++){
+        const t = s / segs;
+        const nx = b.x + (b.ex - b.x) * t + (Math.random()-0.5) * 24 * (1 - t);
+        const ny = b.y + (b.ey - b.y) * t + (Math.random()-0.5) * 24 * (1 - t);
+        ctx.lineTo(nx, ny);
+        prevx = nx; prevy = ny;
+      }
       ctx.stroke();
 
-      // reduce life
+      // outer soft stroke
+      ctx.beginPath();
+      ctx.lineWidth = Math.max(1, b.width * 18) * b.life;
+      ctx.strokeStyle = `rgba(140,210,255,${0.16 * b.life})`;
+      ctx.moveTo(b.x, b.y); ctx.lineTo(b.ex, b.ey); ctx.stroke();
+
+      // add sparkle particles around tip
+      if(Math.random() < 0.15){
+        spawnParticles(b.ex, b.ey, 6);
+      }
+
       b.life -= b.decay;
       if(b.life <= 0) bolts.splice(i,1);
-      // spawn small branch occasionally
+      // spawn branching occasionally for drama
       if(Math.random() < 0.006 && b.life > 0.6 && b.branch === false){
-        spawnBolt((b.x + b.ex)/2 + (Math.random()-0.5)*80, (b.y + b.ey)/2 + (Math.random()-0.5)*80, 0.5, true);
+        spawnBolt((b.x + b.ex)/2 + (Math.random()-0.5)*80, (b.y + b.ey)/2 + (Math.random()-0.5)*80, 0.6, true);
       }
     }
     ctx.globalCompositeOperation = 'source-over';
 
-    // heavy flash overlay (screen)
-    if(flashAlpha > 0){
-      ctx.fillStyle = `rgba(255,240,220,${Math.min(0.95, flashAlpha)})`;
-      ctx.fillRect(0,0,w,h);
-      flashAlpha *= 0.9;
-      if(flashAlpha < 0.01) flashAlpha = 0;
+    // particles
+    for(let i=particles.length-1;i>=0;i--){
+      const p = particles[i];
+      ctx.beginPath();
+      ctx.fillStyle = `rgba(200,240,255,${0.85 * p.life})`;
+      ctx.arc(p.x, p.y, p.r * p.life, 0, Math.PI*2);
+      ctx.fill();
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.06; // gravity slight
+      p.life -= p.decay;
+      if(p.life <= 0 || p.y > H + 50) particles.splice(i,1);
     }
 
-    requestAnimationFrame(draw);
+    // flash overlay
+    if(flash > 0.01){
+      ctx.fillStyle = `rgba(255,245,230,${Math.min(0.9, flash)})`;
+      ctx.fillRect(0,0,W,H);
+      flash *= 0.88;
+      if(flash < 0.02) flash = 0;
+    }
+
+    requestAnimationFrame(loop);
   }
-  requestAnimationFrame(draw);
+  requestAnimationFrame(loop);
 
-  // occasional ambient bolts from top to bottom for drama (very sparse)
-  setInterval(()=>{
-    if(Math.random() < 0.4) return;
-    const x = Math.random() * w;
-    const y = Math.random() * h * 0.6;
+  // gently spawn ambient bolts occasionally (sparse)
+  setInterval(()=> {
+    if(Math.random() < 0.6) return;
+    const x = Math.random() * W;
+    const y = Math.random() * H * 0.5;
     spawnBolt(x, y, 1.0, false);
-  }, 2200);
+  }, 2000);
 
+  // expose toggle variable
+  window.ANIME_LIGHTING = true;
 })();
 
 /* ===========================
-   Lightweight performance note:
-   - Canvas effects are designed to be moderate. If you experience CPU/GPU load on older machines,
-     reduce intervals or remove ambient bolt spawns (search for setInterval in the file).
+   Lightweight notes:
+   - Для слабых ПК можно отключить молнии кнопкой "Молнии: Выкл".
+   - Всё масштабируется относительно окна, canvas responsive.
+   - Если хотите звук при вспышках — могу добавить опционально.
    =========================== */
 </script>
-
 </body>
-</html>*
+</html>(ma
