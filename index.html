@@ -1,165 +1,331 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Retro Console</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Дыхание Грома — Отряд (Garry's Mod)</title>
 <style>
-  body {
-    background-color: #001800;
-    color: #00ff66;
-    font-family: "Courier New", monospace;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
+  :root{
+    --peach-1: #fff2ea;
+    --peach-2: #ffe0cf;
+    --peach-3: #ffd1b3;
+    --peach-4: #ffb88c;
+    --accent: #07203a; /* тёмно-синий для контрастов */
+    --muted: #64707a;
+    --glass: rgba(255,255,255,0.6);
+    --radius: 14px;
+    font-family: Inter, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   }
 
-  /* Эффект "сканирующего луча" */
-  .scanline {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 2px;
-    background: rgba(0, 255, 100, 0.1);
-    animation: scan 3s linear infinite;
-  }
-  @keyframes scan {
-    0% { top: 0; }
-    100% { top: 100%; }
+  /* Reset */
+  *{box-sizing:border-box}
+  body{margin:0;background:
+    radial-gradient(1200px 400px at 10% 10%, var(--peach-2), transparent 15%),
+    radial-gradient(700px 300px at 90% 90%, var(--peach-1), transparent 10%),
+    linear-gradient(180deg,var(--peach-1), #fff 40%);
+    color:var(--accent); -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
   }
 
-  #loading {
-    text-align: center;
-    font-size: 1.2rem;
-    letter-spacing: 2px;
-    white-space: pre;
-    animation: flicker 0.15s infinite alternate;
+  header{
+    display:flex;gap:20px;align-items:center;justify-content:space-between;
+    padding:22px 28px;backdrop-filter: blur(6px);
+  }
+  .brand{
+    display:flex;gap:14px;align-items:center;
+  }
+  .logo{
+    width:56px;height:56px;border-radius:12px;background:
+      conic-gradient(from 200deg at 50% 50%, #ffd1b3 0deg, #ffb88c 90deg, #ffcfa7 200deg);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow: 0 6px 20px rgba(7,32,58,0.08), inset 0 -6px 18px rgba(255,255,255,0.3);
+    font-weight:700;color:var(--accent);font-size:18px;
+  }
+  .title {font-size:18px;font-weight:700;}
+  .subtitle {font-size:12px;color:var(--muted);margin-top:2px;}
+
+  nav{display:flex;gap:8px;align-items:center}
+  .nav-btn{
+    background:transparent;border:0;padding:10px 14px;border-radius:10px;
+    font-weight:600;color:var(--accent);cursor:pointer;
+  }
+  .nav-btn.active{
+    background:linear-gradient(180deg,var(--peach-3),var(--peach-4));
+    box-shadow: 0 6px 18px rgba(7,32,58,0.08);
   }
 
-  @keyframes flicker {
-    from { opacity: 0.8; }
-    to { opacity: 1; }
+  main{max-width:1100px;margin:26px auto;padding:22px;border-radius:18px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.75), rgba(255,255,255,0.62));
+    box-shadow: 0 10px 40px rgba(7,32,58,0.06);
   }
 
-  #login, #terminal {
-    display: none;
-    text-align: center;
-  }
+  .grid{display:grid;grid-template-columns: 1fr 360px; gap:20px;}
+  max-width:920px{ .grid{grid-template-columns:1fr;} .aside{order:2} }
 
-  input[type="password"] {
-    background: none;
-    border: none;
-    border-bottom: 2px solid #00ff66;
-    color: #00ff66;
-    font-family: "Courier New", monospace;
-    padding: 5px;
-    font-size: 1rem;
-    outline: none;
-    width: 200px;
-    text-align: center;
+  /* Главная */
+  .history{
+    padding:18px;border-radius:12px;background:var(--glass);
   }
+  .history h2{margin-top:0;color:var(--accent)}
+  .history p{color:#344047;line-height:1.5}
 
-  button {
-    background: none;
-    border: 1px solid #00ff66;
-    color: #00ff66;
-    padding: 10px 20px;
-    margin: 10px;
-    cursor: pointer;
-    font-family: "Courier New", monospace;
-    transition: 0.2s;
+  .photos{
+    margin-top:16px;display:flex;gap:12px;flex-wrap:wrap;
   }
+  .photo-card{
+    flex:1 1 calc(33.333% - 8px);min-width:140px;height:150px;border-radius:12px;
+    background:linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.45));
+    border:1px dashed rgba(7,32,58,0.06);display:flex;align-items:center;justify-content:center;
+    position:relative;overflow:hidden;
+  }
+  .photo-card img{width:100%;height:100%;object-fit:cover;display:block}
+  .photo-card .meta{
+    position:absolute;left:8px;bottom:8px;background:rgba(7,32,58,0.06);padding:6px 8px;border-radius:8px;font-size:12px;color:var(--accent)
+  }
+  .photo-uploader{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;cursor:pointer}
+  .small{font-size:13px;color:var(--muted)}
 
-  button:hover {
-    background: #00ff66;
-    color: #001800;
-  }
+  /* Боковая панель */
+  .aside{padding:16px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.52));min-height:160px}
+  .aside h3{margin:6px 0 12px 0}
+  .cta{display:flex;flex-direction:column;gap:8px}
+  .btn{padding:10px 12px;border-radius:10px;border:0;background:var(--accent);color:white;font-weight:700;cursor:pointer}
 
-  #output {
-    margin-top: 20px;
-    font-size: 0.95rem;
-    white-space: pre-wrap;
+  /* Вкладки (повышения / дресс-код) */
+  .panel{display:none;padding:18px;border-radius:12px;background:var(--glass)}
+  .panel.active{display:block}
+  .ranks{display:flex;flex-direction:column;gap:12px}
+  .rank{
+    padding:12px;border-radius:10px;background:linear-gradient(180deg,#fff, rgba(255,255,255,0.86));
+    border-left:6px solid var(--peach-4)
   }
+  .rank h4{margin:0 0 6px 0}
+  .requirements{color:var(--muted);font-size:14px}
 
-  #terminal {
-    display: none;
-  }
 
-  .blink {
-    animation: blink 1s step-start infinite;
-  }
-  @keyframes blink {
-    50% { opacity: 0; }
-  }
+/* Dress code */
+  .dress-list{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  max-width:720px{ .dress-list{grid-template-columns:1fr} }
+  .dress-item{padding:12px;border-radius:10px;background:linear-gradient(180deg,#fff, rgba(255,255,255,0.9));border:1px solid rgba(7,32,58,0.04)}
+  .dress-item h5{margin:0;font-size:15px}
+  .example{font-size:13px;color:var(--muted);margin-top:6px}
 
+  footer{text-align:center;padding:18px;color:var(--muted);font-size:13px}
+  /* small utilities */
+  .muted{color:var(--muted)}
+  .hr{height:1px;background:linear-gradient(90deg,transparent,rgba(7,32,58,0.04),transparent);margin:12px 0;border-radius:2px}
+  /* file input invisible */
+  input[type=file]{display:none}
 </style>
 </head>
 <body>
-<div class="scanline"></div>
 
-<div id="loading">Загрузка системы...</div>
+<header>
+  <div class="brand">
+    <div class="logo">DG</div>
+    <div>
+      <div class="title">Дыхание Грома</div>
+      <div class="subtitle">Отряд — Garry's Mod</div>
+    </div>
+  </div>
 
-<div id="login">
-  <p>Введите пароль доступа:</p>
-  <input type="password" id="password" placeholder="••••••">
-  <p id="error" style="color:red; height:20px;"></p>
-</div>
+  <nav aria-label="Главная навигация">
+    <button class="nav-btn active" data-tab="home">Главная</button>
+    <button class="nav-btn" data-tab="ranks">Система повышений</button>
+    <button class="nav-btn" data-tab="dress">Дресс-код</button>
+  </nav>
+</header>
 
-<div id="terminal">
-  <h3>TERMINAL ACCESSED</h3>
-  <button onclick="denied()">Файлы системы</button>
-  <button onclick="denied()">Архивы проекта</button>
-  <button onclick="granted()">Спец. модуль</button>
-  <div id="output"></div>
-  <div class="blink">█</div>
-</div>
+<main>
+  <div class="grid">
+    <!-- основной контент -->
+    <section style="min-width:0">
+      <!-- Главная панель -->
+      <div id="home" class="panel active">
+        <article class="history" aria-labelledby="history-title">
+          <h2 id="history-title">Наша история</h2>
+          <p>
+            Добро пожаловать в отряд «Дыхание Грома» — комьюнити игроков Garry's Mod, объединённых дисциплиной,
+            командной игрой и любовью к атмосферному ролевому взаимодействию.
+            Здесь ты найдёшь краткую хронику становления отряда: от первых рейдов и тренировок до текущих операций и ролевых инициатив.
+          </p>
+          <p class="muted small">
+            Советуем заменить этот текст на вашу реальную историю: ключевые вехи, имена основателей, мемы отряда и правила внутри сервера.
+          </p>
+
+          <div class="photos" aria-label="Фотографии отряда">
+            <!-- 3 фотографии с возможностью загрузки -->
+            <label class="photo-card" aria-label="Фото 1">
+              <input type="file" accept="image/*" data-slot="0">
+              <div class="photo-uploader">
+                <div class="small">Нажмите или перетащите</div>
+                <div class="muted">Фото 1 — Фрагмент операции</div>
+              </div>
+              <div class="meta">Фото 1</div>
+            </label>
+
+            <label class="photo-card" aria-label="Фото 2">
+              <input type="file" accept="image/*" data-slot="1">
+              <div class="photo-uploader">
+                <div class="small">Нажмите или перетащите</div>
+                <div class="muted">Фото 2 — Команда</div>
+              </div>
+              <div class="meta">Фото 2</div>
+            </label>
+
+            <label class="photo-card" aria-label="Фото 3">
+              <input type="file" accept="image/*" data-slot="2">
+              <div class="photo-uploader">
+                <div class="small">Нажмите или перетащите</div>
+                <div class="muted">Фото 3 — Мемы/скрин</div>
+              </div>
+              <div class="meta">Фото 3</div>
+            </label>
+          </div>
+        </article>
+      </div>
+
+      <!-- Система повышений -->
+      <div id="ranks" class="panel" aria-labelledby="ranks-title">
+        <h2 id="ranks-title">Система повышений</h2>
+        <p class="muted small">Примерная схема рангов и требований. Настройте под свои правила сервера.</p>
+
+        <div class="ranks">
+          <div class="rank">
+            <h4>Новобранец</h4>
+            <div class="requirements">Требования: вступление, прохождение базовой тренировки (3 задания), активность — 2 недели.</div>
+          </div>
+
+          <div class="rank">
+            <h4>Штурмовик</h4>
+            <div class="requirements">Требования: участие в 10 операциях, знание основных тактик, командная игра.</div>
+          </div>
+
+          <div class="rank">
+            <h4>Сержа
+
+
+нт</h4>
+            <div class="requirements">Требования: лидер одного отряда, успешное руководство минимум 3 операциями, положительные отзывы.</div>
+          </div>
+
+          <div class="rank">
+            <h4>Офицер</h4>
+            <div class="requirements">Требования: тактическая подготовка, умение проводить инструктаж, 30+ часов в роли.</div>
+          </div>
+
+          <div class="rank">
+            <h4>Командир</h4>
+            <div class="requirements">Требования: назначение руководством; демонстрация ответственности, дисциплины и вклада в сообщество.</div>
+          </div>
+        </div>
+
+        <div class="hr" style="margin-top:16px"></div>
+        <p class="small muted">Подсказка: храните записи о повышениях (лог/скриншоты) и используйте голосование/оценку лидерства для спорных назначений.</p>
+      </div>
+
+      <!-- Дресс-код -->
+      <div id="dress" class="panel" aria-labelledby="dress-title">
+        <h2 id="dress-title">Дресс-код</h2>
+        <p class="muted small">Рекомендации по внешнему виду персонажей в отряде. Нужен единый визуальный стиль для атмосферы и узнаваемости.</p>
+
+        <div class="dress-list">
+          <div class="dress-item">
+            <h5>Основной комплект</h5>
+            <div class="example">Тёмно-синий бронежилет, персиковый нашивной знак «DG» на плече, чёрные тактические штаны.</div>
+          </div>
+
+          <div class="dress-item">
+            <h5>Офицерский комплект</h5>
+            <div class="example">Более светлая куртка с эмблемой, доп. элементы: заплечный фонарь, роль-значки.</div>
+          </div>
+
+          <div class="dress-item">
+            <h5>Униформа для операций</h5>
+            <div class="example">Камуфляж тёмно-персиковых/песочных тонов; обязательны каска и защитные очки в боевых сценариях.</div>
+          </div>
+
+          <div class="dress-item">
+            <h5>Запрещено</h5>
+            <div class="example">Открытые красочные костюмы, элементы враждебных группировок, яркие неоновые аксессуары.</div>
+          </div>
+        </div>
+
+        <div class="hr"></div>
+        <p class="small muted">Пожелание: добавьте примеры скриншотов в секцию «Главная» для единообразия оформления.</p>
+      </div>
+    </section>
+
+    <!-- боковая панель -->
+    <aside class="aside" aria-label="Боковая информация">
+      <h3>Коротко</h3>
+      <div class="muted">Отряд: <strong>Дыхание Грома</strong></div>
+      <div class="muted">Игра: Garry's Mod</div>
+      <div style="height:10px"></div>
+      <div class="cta">
+        <button class="btn" id="download-style">Скачать шаблон (HTML)</button>
+        <div class="small muted">Подстройте тексты, картинки и систему повышений под свои правила.</div>
+      </div>
+    </aside>
+  </div>
+
+  <footer>
+    © <span id="year"></span> Дыхание Грома — сайт-шаблон. Сделано для сообщества Garry's Mod.
+  </footer>
+</main>
 
 <script>
-  const loading = document.getElementById("loading");
-  const login = document.getElementById("login");
-  const terminal = document.getElementById("terminal");
-  const error = document.getElementById("error");
-  const passwordInput = document.getElementById("password");
-  const output = document.getElementById("output");
-
-  // Эмуляция загрузки
-  setTimeout(() => {
-    loading.style.display = "none";
-    login.style.display = "block";
-  }, 3000);
-
-  passwordInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      checkPassword();
-    }
+  // Навигация вкладок
+  document.querySelectorAll('.nav-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=> {
+      document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      const tab = btn.getAttribute('data-tab');
+      document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+      const panel = document.getElementById(tab);
+      if(panel) panel.classList.add('active');
+      // плавный скролл к main
+      window.scrollTo({top:0, behavior:'smooth'});
+    });
   });
 
-  function checkPassword() {
-    if (passwordInput.value === "S.J-Ryota") {
-      login.style.display = "none";
-      terminal.style.display = "block";
-    } else {
-      error.textContent = "Неверный пароль.";
-      setTimeout(() => error.textContent = "", 2000);
-      passwordInput.value = "";
-    }
+  // Загрузка картинок в слоты — превью
+  function handleFileInput(input){
+    const file = input.files && input.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    const card = input.closest('.photo-card');
+    reader.onload = e => {
+      // заменяем содержимое на <img>
+      card.innerHTML = '<img src="'+e.target.result+'" alt="Фото отряда">';
+    };
+    reader.readAsDataURL(file);
   }
+  document.querySelectorAll('input[type=file]').forEach(inp=>{
+    inp.addEventListener('change', ()=> handleFileInput(inp));
+    // drag and drop support for label
+    const label = inp.closest('label');
+    label.addEventListener('dragover', e=>{e.p
 
-  function denied() {
-    output.textContent = ">>> ДОСТУП ЗАПРЕЩЕН <<<";
-  }
 
-  function granted() {
-    output.textContent = ">>> ДОСТУП РАЗРЕШЕН <<<\n\nЗдесь будет твой текст...";
-  }
+reventDefault(); label.style.borderColor = 'rgba(7,32,58,0.12)';});
+    label.addEventListener('dragleave', e=>{label.style.borderColor='';});
+    label.addEventListener('drop', e=>{ e.preventDefault(); label.style.borderColor=''; if(e.dataTransfer.files) { inp.files = e.dataTransfer.files; handleFileInput(inp); }});
+  });
+
+  // Скачивание шаблона (сохранение текущего HTML) — создаёт файл и предлагает скачать
+  document.getElementById('download-style').addEventListener('click', ()=>{
+    const html = '<!doctype html>\\n' + document.documentElement.outerHTML;
+    const blob = new Blob([html], {type:'text/html;charset=utf-8'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'dyhanie_groma_template.html';
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  });
+
+  // Текущий год
+  document.getElementById('year').textContent = new Date().getFullYear();
 </script>
+
 </body>
 </html>
-
-
-
-
-
